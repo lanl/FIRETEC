@@ -13,14 +13,3 @@ distribute copies to the public, perform publicly and display publicly,
 and to permit others to do so.
 
 #-------------------------------------------------------------------------
-
-FIRETEC OSS LICENSE is O5086
-
-#-------------------------------------------------------------------------
-
-This branch hosts the latest Check-point version of FIRETEC-1.5.0. Use the 'develop' branch for latest features and current developments.
-
-In this repository, we have three directories:
-    1) CODE-xxxx - contains the source code for the software, see the README.md in that directory to see how to configure and build the executable of the software.
-    2) TOOLS - contains a number of developed example input files and post-analysis script used to help set up and interpret FIRETEC simulations.
-    3) DOCS - the future destination of documentation as it's developed and posted.
