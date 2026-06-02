@@ -1,0 +1,168 @@
+## Inputs
+There is one main input file with an example found in this directory.
+
+The main input file which the program will look for is called ‘gridlist’ and is parsed with variables listed in the following table. NOTE: for each variable to be correctly parsed, they need to be found in 'gridlist' as VARIABLE = VALUE (ex: nx = 200) with spaces before and after the equality and only one variable per line.
+
+## Gridlist Possible Variables
+!-------------------------------------------------------------------------------------------------
+Variable -- Default Value -- Dependency -- Module -- Description
+!-------------------------------------------------------------------------------------------------
+!--------------- Domain Variables -------------------------------
+nt    --  10000 --  None  -- Main -- Total number of full timesteps for simulation
+nts   --  10    --  None  -- Main -- Number of small timesteps per large timestep for MOA
+dts   --  0.001 --  None  -- Main -- Small timestep size (s)
+n     --  200   --  None  -- Main -- Number of cells in the x-dimension
+m     --  200   --  None  -- Main -- Number of cells in the y-dimension
+l     --  40    --  None  -- Main -- Number of cells in the z-dimension
+dx    --  2.0   --  None  -- Main -- Spacing of cells in the x-dimension (m)
+dy    --  2.0   --  None  -- Main -- Spacing of cells in the y-dimension (m)
+dz    --  15.0  --  None  -- Main -- Spacing of cells in the z-dimension before stretching (m)
+aa1   --  0.1   --  None  -- Main -- Vertical stretching component defined in zcart function of metryc.f, 0 if no stretching or no topo to vertical size
+!--------------- Architecture Variables -------------------------
+nprocx  --  8     --  None  --  Main  -- Number of processors in the x direction
+nprocy  --  8     --  None  --  Main  -- Number of processors in the y direction
+ih      --  3     --  None  --  Main  -- Number of halo cells
+!--------------- Boundary Variables -----------------------------
+ibcx              --  1     --  None                              --  Main        --  X boundary conditions (0=cyclic,1<=different relaxation options)
+ibcy              --  1     --  None                              --  Main        --  Y boundary conditions (0=cyclic,1<=different relaxation options)
+nr                --  5     --  ibcx/ibcy>0                       --  Main        --  Number of cells for lateral relaxation
+ibclatopen        --  0     --  None                              --  Main        --  Open outlet, free slip option at top
+ibctopopen        --  0     --  None                              --  Main        --  Top boundary relaxation options
+iab               --  1     --  None                              --  Main        --  Top absorption options
+zab               --  400   --  None                              --  Main        --  Bottom of top damper (m)
+zabt              --  400   --  iab=3                             --  Main        --  Bottom of secondary top damper (m)
+tow               --  10    --  None                              --  Main        --  Magnitude parameter for top relaxation
+itheta            --  0     --  None                              --  Main        --  Stable layer flag at domain top
+ilspgf            --  0     --  ibcx/icy=0                        --  Main        --  Turns on the large scale pressure gradient forcing
+izlspgf           --  1     --  ilspgf=1                          --  Main        --  Option for max flux of whole domain or a slice at height zu
+frqlspgf          --  10000 --  ilspgf=1                          --  Main        --  Frequency of lspg forcing
+islip             --  0     --  None                              --  Main        --  Option for no-slip boundary condition forcing
+windfieldin       --  0     --  None                              --  Main        --  Option to readin windfield files for informed boundaries
+ixevariation      --  0     --  None                              --  Main        --  Option for dynamic boundaries (0=fixed,1=ramp,2=windfield,3=sparse data,4=dense data)
+windspeedupfactor --  1     --  ixevariation=2                    --  xeVariation --  Accomadation for timestep differences between wind runs and fire runs
+itinterp          --  10    --  ixevariation=2 or windfieldout=1  --  xeVariation --  Number of timesteps between interpolation files for windrun readins
+ibcells           --  5     --  ixevariation=2 or windfieldout=1  --  xeVariation --  Number of x boundary cells saved/readin from windruns
+jbcells           --  5     --  ixevariation=2 or windfieldout=1  --  xeVariation --  Number of y boundary cells saved/readin from windruns
+is                --  1     --  ixevariation=2 or windfieldout=1  --  xeVariation --  Lower x indice of cells saved/readin from windruns
+ie                --  n     --  ixevariation=2 or windfieldout=1  --  xeVariation --  Upper x indice of cells saved/readin from windruns
+js                --  1     --  ixevariation=2 or windfieldout=1  --  xeVariation --  Lower y indice of cells saved/readin from windruns
+je                --  m     --  ixevariation=2 or windfieldout=1  --  xeVariation --  Upper y indice of cells saved/readin from windruns
+nSensors          --  None  --  ixevariation=3/4                  --  xeVariation --  Number input sensors
+SensorTimes       --  None  --  ixevariation=3                    --  xeVariation --  Sensor input times (s)
+SensorX           --  None  --  ixevariation=3/4                  --  xeVariation --  X locations of sensors (m)
+SensorY           --  None  --  ixevariation=3/4                  --  xeVariation --  Y locations of sensors (m)
+SensorZ           --  None  --  ixevariation=3/4                  --  xeVariation --  Z locations of sensors (m)
+SensorUvel        --  None  --  ixevariation=3                    --  xeVariation --  U velocity measurement of sensors (m/s)
+SensorVvel        --  None  --  ixevariation=3                    --  xeVariation --  V velocity measurement of sensors (m/s)
+freqSensor        --  None  --  ixevariation=4                    --  xeVariation --  Frequency of measurement for dense sensor data (s)
+!--------------- Turbulence Variables ---------------------------
+iturb         --  2   --  None    --  Main        --  Subgrid turbulence resolution options (1=Smagorinsky,2=Linn)
+isa           --  2   --  iturb=2 --  subGridTurb --  Options for the calculation of sa
+rturbprandtl  --  2   --  iturb=2 --  subGridTurb --  Inverse of the turbulent prandtle number for scalar diffusion
+!--------------- Fire Variables ---------------------------------
+ifire     --  1             --  None    --  Main  --  Option for burning vegetation
+inonlocal --  0             --  None    --  Main  --  Option for non-local burning
+idiffsies --  0             --  None    --  Main  --  Option for creeping fire diffusion
+ifuel     --  1             --  ifire=1 --  Main  --  Options for burning fuel pdf choice
+ignfile   --  'ignite.dat'  --  ifire>0 --  Main  --  Name of ignition file
+!--------------- Radiation Variables ----------------------------
+irad          --  2   --  None  --  Main  --  Option for thermal radiation resolution (0=none,1=diffusion,2=monte-carlo,3=sink)
+icallrad      --  5   --  None  --  Main  --  Timestep frequency with which radiation is recalculated
+crad          --  50  --  None  --  Main  --  Soot radiation constant
+irandseed     --  0   --  None  --  Main  --  Random function seed
+iseed         --  0   --  None  --  Main  --  Seed for randomization function
+isootmodel    --  0   --  None  --  Main  --  Options for radiating soot model
+iradeastflux  --  0   --  None  --  Main  --  Flag to receive radiation from rising sun
+!--------------- Smoke Variables --------------------------------
+iemissions        --  0       --  None          --  Main      --  Turns on emissions tracking (1=fixed,2=factors,3=physics)
+relativeHumidity  --  0       --  None          --  Main      --  Initialize ambient humidity
+nEmit             --  0       --  iemissions>0  --  Emissions --  Number of gaseous smoke species
+Species           --  None    --  nEmit>0       --  Emissions --  Array of smoke species
+cpEmit            --  1040    --  nEmit>0       --  Emissions --  Array of smoke species' heat capacity (J/kg K)
+mwEmit            --  28.014  --  nEmit>0       --  Emissions --  Array of smoke species' molecular weight (kg/kmol)
+efEmit            --  1.6     --  iemissions=2  --  Emissions --  Array of smoke species' fixed emission factors (kg/kg)
+nAero             --  0       --  iemissions>0  --  Emissions --  Number of aerosol smoke species to be tracked
+nMAero            --  2       --  nAero>0       --  Emissions --  Number of moments for aerosol size distribution
+SpeciesAero       --  None    --  nAero>0       --  Emissions --  Array of smoke aerosol species
+rhoAero           --  1850    --  nAero>0       --  Emissions --  Array of smoke aerosols' true density (kg/m3)
+efAero            --  0.01    --  iemissions=2  --  Emissions --  Array of smoke aerosols' emission factors (kg/kg)
+!--------------- Firebrand Variables ----------------------------
+ifbrand         --  0             --  None                  --  Main        --  Turns on firebrand tracking
+shapeFB         --  1             --  ifbrand=1             --  Firebrands  --  Flag to determine characteristic shape of firebrands (1=disk,2=cylinder,3=sphere)
+dsizeFB         --  1             --  ifbrand=1             --  Firebrands  --  Flag to determine how size changes as burning commences (1=radius,2=height)
+radiusFB        --  0.001         --  ifbrand=1             --  Firebrands  --  Initial radius of firebrands (m)
+heightFB        --  0.001         --  ifbrand=1,shapeFB!=3  --  Firebrands  --  Initial height of firebrands (m)
+rhoFB           --  100           --  ifbrand=1             --  Firebrands  --  Initial density of firebrands (kg/m3)
+TempThreshFB    --  500           --  ifbrand=1             --  Firebrands  --  Temperature threshold for launching firebrands (K)
+outname_fb      --  'brand.out'   --  ifbrand=1             --  Firebrands  --  Name for firebrand output files
+restartfile_fb  --  'comp.out.h5' --  ifbrand=1,irst=1      --  Firebrands  --  Name of firebrand restart file
+!--------------- Higrad Variables -------------------------------
+icorio    --  0 --  None  --  Main  --  Turns on coriolis effect
+iord      --  2 --  None  --  Main  --  Advection order of resolution
+nonos     --  1 --  None  --  Main  --  Advection for non-oscillatory flow option
+idiv      --  1 --  None  --  Main  --  Divergent flows option
+nfct      --  1 --  None  --  Main  --
+nonosold  --  1 --  None  --  Main  --  Other non-oscillatory flow option
+!--------------- Thermodynamic Variables ------------------------
+tambient    --  300     --  None  --  Main  --  Ambient temperature (K)
+pressground --  101325  --  None  --  Main  --  Ambient ground pressure (Pa)
+zgroundref  --  0       --  None  --  Main  --  Elevation of ground (m)
+!--------------- Initialization Variables -----------------------
+iperturb      --  0   --  None              --  Main        --  Perturbation option for cyclic runs
+u0            --  3   --  None              --  Main        --  Initial ambient wind speed in x direction (m/s)
+v0            --  3   --  None              --  Main        --  Initial ambient wind speed in y direction (m/s)
+uswitch       --  2   --  None              --  Main        --  Options for x direction ambient wind profiles (0=wall,1=ramp,2=log)
+vswitch       --  2   --  None              --  Main        --  Options for y direction ambient wind profiles (0=wall,1=ramp,2=log)
+uramp         --  10  --  uswitch=1         --  xeVariation --  Ramp target for u velocity (m/s)
+vramp         --  10  --  vswitch=1         --  xeVariation --  Ramp target for v velocity (m/s)
+uramptime     --  30  --  uswitch=1         --  xeVariation --  Time from ramp of u velocity (m/s) 
+vramptime     --  30  --  vswitch=1         --  xeVariation --  Time from ramp of v velocity (m/s) 
+zu            --  25  --  uswitch/vswitch=2 --  Main        --  Reference height for log wind profile
+ius           --  0   --  uswitch/vswitch=2 --  Main        --  Lower x indice for reference zone in lai computation (0 means whole domain)
+iue           --  0   --  uswitch/vswitch=2 --  Main        --  Upper x indice for reference zone in lai computation (0 means whole domain)
+jus           --  0   --  uswitch/vswitch=2 --  Main        --  Lower y indice for reference zone in lai computation (0 means whole domain)
+jue           --  0   --  uswitch/vswitch=2 --  Main        --  Upper y indice for reference zone in lai computation (0 means whole domain)
+slopeangle    --  0   --  None              --  Main        --  Archaic slope usage (use topo now) for rotating gravity
+slopeazimuth  --  0   --  None              --  Main        --  Archaic slope usage (use topo now) for rotating gravity
+topofile      --  ''  --  None              --  Main        --  Read-in for a topography file
+!--------------- Vegetation Variables ---------------------------
+nfuel     --  1     --  None  --  Main  --  Number of fuel types
+ivegread  --  0     --  None  --  Main  --  Option for fuel bed read-in
+rhoMicro  --  500   --  None  --  Main  --  Vegetation's true dry density (kg/m3)
+cpwood    --  2500  --  None  --  Main  --  Vegetation's dry heat capacity (J/kg K)
+!--------------- IO Variables ---------------------------------
+frqoutput           --  100               --  None                            --  Main        --  Frequency (timestep) of xv output
+frqfilstr           --  0                 --  None                            --  Main        --  Frequency (timestep) of file filtering
+outname             --  'comp.out'        --  None                            --  Main        --  Name of xv output files
+irst                --  0                 --  None                            --  Main        --  Controls whether or not this simulation restarts from another
+restartfile         --  'comp.out.h5'     --  irst=1                          --  Main        --  Name of restart file
+windfieldout        --  0                 --  None                            --  Main        --  Option to output windfield files at boundaries
+itwindfield         --  80000             --  windfieldout=1                  --  xeVariation --  Timestep to output restart file for fire runs
+windfieldstartfile  --  'windfieldstart'  --  windfieldout=1 or xevariation=2 --  xeVariation --  Name of windfield restart file for fire runs
+xvdataname          --  'xvdata'          --  windfieldout=1 or xevariation=2 --  xeVariation --  Name of xv boundary data files output by windruns
+isensor             --  0                 --  None                            --  Main        --  Switch for using sensor output
+se_frq_write        --  1                 --  isensor=1                       --  Sensors     --  Fequency in timesteps to write sensor data
+numsensors          --  5                 --  isensor=1                       --  Sensors     --  Number of sensors to write
+ncycle              --  0                 --  isensor=1                       --  Sensors     --  Timestep to start writing sensor data
+locfile             --  0                 --  isensor=1                       --  Sensors     --  Location file for sensor locations
+sensorlocs          --  'sensorlocs.txt'  --  locfile=1                       --  Sensors     --  Name of sensor location file
+se_xloc             --  None              --  locfile=0                       --  Sensors     --  array of x locations of sensors
+se_yloc             --  None              --  locfile=0                       --  Sensors     --  array of y locations of sensors
+se_zloc             --  None              --  locfile=0                       --  Sensors     --  arrat of z locations of sensors
+!--------------- HeatSource Variables ---------------------------
+iheatsource       --  0                   --  None          --  Main        --  Flag to trigger artificial heat sources (1=circles,2=rectangles)
+isource_function  --  None                --  iheatsource>0 --  HeatSource  --  Flag to control type of source (0=constant,1=step,2=sinusoidal)
+nsource_hs        --  None                --  iheatsource>0 --  HeatSource  --  Number of heat sources
+av_hs             --  None                --  iheatsource>0 --  HeatSource  --  Array of surface area to volume ratios of heat sources (m2/m3)
+flux_hs           --  None                --  iheatsource>0 --  HeatSource  --  Array of fluxes of heat from sources (W/m2)
+depth_hs          --  None                --  iheatsource>0 --  HeatSource  --  Array of heights of heat sources (m)
+radius_hs         --  None                --  iheatsource=1 --  HeatSource  --  Array of heat source radii (m)
+xcen_hs           --  None                --  iheatsource=1 --  HeatSource  --  Array of heat source x locations (m)
+ycen_hs           --  None                --  iheatsource=1 --  HeatSource  --  Array of heat source y locations (m)
+xl_hs             --  None                --  iheatsource=2 --  HeatSource  --  Array of heat source lower x locations (m)
+xu_hs             --  None                --  iheatsource=2 --  HeatSource  --  Array of heat source upper x locations (m)
+yl_hs             --  None                --  iheatsource=2 --  HeatSource  --  Array of heat source lower y locations (m)
+yu_hs             --  None                --  iheatsource=2 --  HeatSource  --  Array of heat source upper y locations (m)
+imass_source      --  None                --  iheatsource>0 --  HeatSource  --  Flag to control release of gaseous mass from heat source
+fm_hs             --  None                --  iheatsource>0 --  HeatSource  --  Array of mass release rates from heat source (kg/m3 s)
+MLRHRRinputs      --  'MLRHRRinputs.dat'  --  iheatsource>0 --  HeatSource  --

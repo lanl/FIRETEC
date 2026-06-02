@@ -1,0 +1,36 @@
+! This represents a very basic and minimum gridlist to get started
+
+irst                = 0             ! 0 = fresh start, 1 = restart
+restartfile         = './comp/comp.out.4000'  
+nt                  = 1000         ! number of large time steps to run 
+frqoutput           = 1000            ! output frequency (large time step) 
+nprocx              = 2   
+nprocy              = 2             ! Processors along x and y directions
+n                   = 50    
+m                   = 50 
+l                   = 20		   
+
+! io
+!------------------------------------
+outname            = './comp/comp.out'
+
+! bc and dampers
+!------------------------------------
+ibcx = 1 
+ibcy = 1  ! ibcx>=1 and ibcy>=1 different relaxation options
+
+! drag and turbulence parameters
+!------------------------------------
+ifire              = 1 
+
+! radiation parameters
+!------------------------------------
+irad               = 2 
+
+! ambient conditions (temp, pres, wind) and env forces (corio, lspgf)
+!------------------------------------
+u0        = 5.0  
+v0        = 0.0
+uswitch   = 2    
+vswitch   = 2  
+zu        = 10 
