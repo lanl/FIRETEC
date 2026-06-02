@@ -7,7 +7,12 @@ FIRETEC OSS LICENSE is O5086
 
 This branch hosts the latest Check-point version of FIRETEC-1.5.0. Use the 'develop' branch for latest features and current developments.
 
-FIRETEC-1.5.0 builds on FIRETEC-1.4.1 but consists of several major code restructurings, new capabilities, and extensive general code clean-up.
+In this repository, we have three directories:
+    1) CODE-xxxx - contains the source code for the software, see the README.md in that directory to see how to configure and build the executable of the software.
+    2) TOOLS - contains a number of developed example input files and post-analysis script used to help set up and interpret FIRETEC simulations.
+    3) DOCS - the future destination of documentation as it's developed and posted.
+
+FIRETEC-1.5.0, this current version of FIRETEC, builds on FIRETEC-1.4.1 but consists of several major code restructurings, new capabilities, and extensive general code clean-up.
 
 ---Code Restructuring
 HIGRAD/FIRETEC Integration
