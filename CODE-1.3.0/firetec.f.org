@@ -10,8 +10,6 @@
       use msga
       use ignite
       use nonlocalfunction
-      use workavg
-      use constants
 
       Implicit None
 
@@ -20,30 +18,15 @@
       integer,intent(in) :: it
       integer :: i,j,k,its
       real::rneteng,ff,fw  ! defined in fuel.f
-
       if(inonlocal.eq.1)then
        call firetecnonlocal(it)
       else
-      call rmaxmin1(temps,'temps',1-ih,np+ih,1-ih,mp+ih,l)
-      call rmaxmin1(tempg,'tempg',1-ih,np+ih,1-ih,mp+ih,l)
-
-     
+c      call rmaxmin1(temps,'temps',1-ih,np+ih,1-ih,mp+ih,l)
+c      call rmaxmin1(tempg,'tempg',1-ih,np+ih,1-ih,mp+ih,l)
+      
       ! here we update source position AND fuel properties in the heat source zone
       if (iheatsource.ge.1.and.((time+restarttime).ge.startigntime)) 
      + call updateHeatSourcePosition()
-
-!FP09/2019 we don't want this supension anymore, which makes no sense in
-!case of multiple ignitions
-! - no reaction when ignited. 
-!      if(((time+restarttime).ge.startigntime).and.  !line ignition
-!     &        ((time+restarttime).le.(startigntime+
-!     &                         (targettemp-tambient)/ramprate)))then
-!         ffparam=0.0
-!      else
-!         ffparam=1.0
-!      endif 
- 
-
       
       if(iwallclock.EQ.1) wtime2=MPI_Wtime()
 ! fp moved the frhovapor to turb...
@@ -73,65 +56,61 @@
       endif   !end if (irad.eq.1.and.(it.eq.1.or.mod(it,10).eq.0))
       if(iwallclock.EQ.1) call computeWallTime(wtime2,14,'radiation')
        ! LOOP ON SMALL TIME STEP IN FUEL, LARGE TIME STEP ELSEWHERE
-       !in CODE3, KOO moved back the loop for small timestep including
-       ! above lfuel. FP09/2019 put it back as it is faster
-      do k=1,lfuel
-!       do k=1,l
+       do k=1,lfuel
         do j=1,mp
          do i=1,np
          !if (rhof(i,j,k).gt.min_rhof.or.(iheatsource.ge.1)) then
-          if (rhof(i,j,k).gt.min_rhof) then
+         if (rhof(i,j,k).gt.min_rhof) then
 c      begin firetec small timestepping loop
-          do its=1,ntp
+           do its=1,ntp
 cc call to fuel computes xvfuel (required in convection, fuel)
          !call computexvfuel(i,j,k)
-            ff=0.0;fw=0.0;rneteng=0.0
-            if (iheatsource.eq.0.or.(iheatsource.eq.2.and.k.gt.1)) then 
+         ff=0.0;fw=0.0;rneteng=0.0
+        if (iheatsource.eq.0.or.(iheatsource.eq.2.and.k.gt.1)) then 
 cc call to convection to define convht        
-                call convection(i,j,k)
+          call convection(i,j,k)
 cc ff and fw, psif, psiw psiwmax, frhof,frhowater thanks to the pdf function
-              !if (rhof(i,j,k).gt.min_rhof) call fuel(i,j,k,rneteng,ff,fw)
-                call fuel(i,j,k,rneteng,ff,fw)
+          call fuel(i,j,k,rneteng,ff,fw)
 c compute frho, fox,frhovapor
-            endif ! if (iheatsource.eq.0.or.(iheatsource.eq.2.and.k.gt.1)) then
-            call gas_dtp(i,j,k,rneteng,ff,fw)
-            !heatSourceRHS modify fi, frho
-          enddo ! loop on its
+        endif
+        call gas_dtp(i,j,k,rneteng,ff,fw)
+        !heatSourceRHS modify fi, frho
+            enddo ! loop on its
           else ! rhof(i,j,k).le.minrhof, loop on large time step
             call gas_ltp(i,j,k)
           endif
          enddo !i
         enddo !j
-      enddo !k
-      ! LOOP ON LARGE TIME STEP ELSEWHERE
-      do k=1+lfuel,l
+       enddo !k
+        ! LOOP ON LARGE TIME STEP ELSEWHERE
+       do k=1+lfuel,l
         do j=1,mp
          do i=1,np
             call gas_ltp(i,j,k)
          enddo !i
         enddo !j
-      enddo !k
-      call ignite_pattern()
-      !reset forcing terms to zero 
+       enddo !k
+       call ignite_pattern()
+       !reset forcing terms to zero 
 
-      ! call rmaxmin(xvb,1-ih,np+ih,1-ih,mp+ih,l,nv)
-      ! call rmaxmin1(firad,'firad',1-ih,np+ih,1-ih,mp+ih,l)
-      ! call rmaxmin1(temps,'temps at end of FIRETEC',1-ih,np+ih,1-ih,mp+ih,l)
-      ! call rmaxmin1(frhosiesrad,'frhosiesrad',1-ih,np+ih,1-ih,mp+ih,l)
-      ! call rmaxmin1(firad,'firad',10,40,4,16,10)
+       ! call rmaxmin(xvb,1-ih,np+ih,1-ih,mp+ih,l,nv)
+       ! call rmaxmin1(firad,'firad',1-ih,np+ih,1-ih,mp+ih,l)
+       ! call rmaxmin1(temps,'temps at end of FIRETEC',1-ih,np+ih,1-ih,mp+ih,l)
+       ! call rmaxmin1(frhosiesrad,'frhosiesrad',1-ih,np+ih,1-ih,mp+ih,l)
+       ! call rmaxmin1(firad,'firad',10,40,4,16,10)
 
 c walltimer !KOO         
       if(iwallclock.EQ.1) call computeWallTime(wtime2,17,'updates')
                                                              
       endif  !end of nonlocal shunt
-!
+
       !JAS adding updates to keep halos in sync with real cells 7/7/06 
 !      do nn=1,nv
 !       call updated(xvb(1-ih,1-ih,1,nn),xe(1-ih,1-ih,1,nn),
 !     +              np,mp,l,1-ih,np+ih,1-ih,mp+ih,1,0)
 !      enddo
 !      call updated(pr,pr,np,mp,l,1-ih,np+ih,1-ih,mp+ih,1,0)
-
+!
       return
       end
 
@@ -159,16 +138,6 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
         frho=ff*dtp*rnfuel
         !dti is already in it (turb.f) fox=(-ff*rno+0.5*foxb(i,j,k)*dti)*dtp
         fox=(-ff*rno+0.5*foxb(i,j,k))*dtp
-! FP :This test is incorrect, as foxb can be positive
-!       if(fox.GT.0) then
-!         print*,"negative fox dpt",ff
-!         print*,i,j,k,mpi_rank
-!          print*,'xvb123',xvb(i,j,k,1),xvb(i,j,k,2),xvb(i,j,k,3)
-!          print*,'xvb456',xvb(i,j,k,4),xvb(i,j,k,5),xvb(i,j,k,6)
-!          print*,'xvb78p',xvb(i,j,k,7),xvb(i,j,k,8),pr(i,j,k)
-!          STOP
-!        endif
-
         if(irhovapor.eq.1)
      +    frhovapor=(fw+0.5*frhovaporb(i,j,k))*dtp
         ! computation of theta eq rhs
@@ -185,7 +154,9 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
         !TODO: should change this: forcing on fuel should be done in fuel.f
         if (iheatsource.ge.1.and.((time+restarttime).ge.startigntime))
      + call heatSourceRHS(i,j,k,fi,frho,dtp)
-
+        ! TODO : check why f1avg,.. are forced to 0 at the
+        ! end of "force" and beginning of "turb":
+        ! forcing of xvb(1,2,3) should be done here only!
         xvb(i,j,k,1)=xvb(i,j,k,1)+0.5*f1avg(i,j,k)*dtp
         xvb(i,j,k,2)=xvb(i,j,k,2)+0.5*f2avg(i,j,k)*dtp
         xvb(i,j,k,3)=xvb(i,j,k,3)+0.5*f3avg(i,j,k)*dtp
@@ -217,8 +188,8 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       integer,intent(in)::i,j,k
       real:: energy,capqterm
       real::fi,frho,fox,frhovapor
-
         frho=0.0
+        !fox=0.5*foxb(i,j,k)
         fox=0.5*foxb(i,j,k)*dt
         if(irhovapor.eq.1)
      +    frhovapor=0.5*frhovaporb(i,j,k)*dt
@@ -226,9 +197,11 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
         pr(i,j,k)=(xvb(i,j,k,4)*rg/prrcp)**(cp/cv)
         capqterm=energy*(1.e5/pr(i,j,k))**(rg/cp)/cp !rrl
         fi=fib(i,j,k)*dt+2.*capqterm*dt
+        ! TODO : check why f1avg,.. are forced to 0 at the
+        ! end of "force" and beginning of "turb":
+        ! forcing of xvb(1,2,3) should be done here only!
         if (iheatsource.ge.1.and.((time+restarttime).ge.startigntime).and.k.le.lHeatSource)
      +         call heatSourceRHS(i,j,k,fi,frho,dt)
-
         xvb(i,j,k,1)=xvb(i,j,k,1)+0.5*f1avg(i,j,k)*dt
         xvb(i,j,k,2)=xvb(i,j,k,2)+0.5*f2avg(i,j,k)*dt
         xvb(i,j,k,3)=xvb(i,j,k,3)+0.5*f3avg(i,j,k)*dt
@@ -320,18 +293,9 @@ c       BELOW THIS LINE : IGNITION ONLY
          do j=1,mp
           do i=1,np
            if(ifirestart(i,j,k).eq.1)then
-            !if(rhof(i,j,k).GT.min_rhof .and. k.LT.3) then  ! KOO 
-            !FP092019 put igniteVerticalExtent as a parameter in
-            !gridlist
-            if (igniteVerticalExtent.eq.0.or.k.le.igniteVerticalExtent) then
-            if(rhof(i,j,k).GT.min_rhof) then   
             temps(i,j,k)=max(temps(i,j,k),min(((time+restarttime)-startigntime)
      &                      *(ramprate)+tambient,targettemp))
             sies(i,j,k)=cpsolid(i,j,k)*temps(i,j,k)
-!            print *,'JLW ignite',i,j,k,
-!     &          time+restarttime,temps(i,j,1),sies(i,j,1),rhos(i,j,1)
-            endif ! rhof(i,j,k).GT.min_rhof
-            endif
            endif
           enddo
          enddo
@@ -601,6 +565,8 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
          enddo
         return
         end subroutine radiationSink
+
+
 
 !iheatsource>=1
 !This subroutine update the position of a heat source in the scene according to its ros

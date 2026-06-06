@@ -62,7 +62,6 @@ c        call writeio(tempg,21,1-ih,np+ih,1-ih,mp+ih,l)              ! inserted 
         call writeio(sies,21,1-ih,np+ih,1-ih,mp+ih,l,0)            ! field 12
       !  call writeio(rhos,21,1-ih,np+ih,1-ih,mp+ih,l,0)            ! field 13
 !        call rmaxmin1(rhos,'rhos in io',1-ih,np+ih,1-ih,mp+ih,l,0)
-        if (idirt.eq.1) call writeio(rhodirt,21,1-ih,np+ih,1-ih,mp+ih,l,0)         ! field 14
         call writeio(psiwmax,21,1-ih,np+ih,1-ih,mp+ih,l,0)         ! field 16
         if (irad.GE.1.and.irod.eq.1) then  !KOO eq->GE
           call writeio(firad,21,1-ih,np+ih,1-ih,mp+ih,l,0)       ! field 23
@@ -206,7 +205,6 @@ c        call writeio(tempg,21,1-ih,np+ih,1-ih,mp+ih,l)              ! inserted 
 
           call    readio(sies,41,l,1-ih,np+ih,1-ih,mp+ih)
           !call    readio(rhos,41,l,1-ih,np+ih,1-ih,mp+ih)    !rm fp
-          if (idirt.eq.1) call    readio(rhodirt,41,l,1-ih,np+ih,1-ih,mp+ih)  !rm fp
           call    readio(psiwmax,41,l,1-ih,np+ih,1-ih,mp+ih)
 
 c          if(irad.GE.1) then   !KOO eq->GE

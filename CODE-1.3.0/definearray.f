@@ -142,7 +142,6 @@ c      allocate (rely(1-ih:mp+ih))
       allocate (foxb(1-ih:np+ih,1-ih:mp+ih,l));      foxb=0.
       allocate (rmoist(1-ih:np+ih,1-ih:mp+ih,l));    rmoist=0.
       allocate (rhos(1-ih:np+ih,1-ih:mp+ih,l));      rhos=0.
-      if (idirt.eq.1) allocate (rhodirt(1-ih:np+ih,1-ih:mp+ih,l));      rhodirt=0.
       allocate (rhowater(1-ih:np+ih,1-ih:mp+ih,l));  rhowater=0.
       allocate (cpsolid(1-ih:np+ih,1-ih:mp+ih,l));   cpsolid=0.
       allocate (sies(1-ih:np+ih,1-ih:mp+ih,l));      sies=0.
@@ -167,13 +166,12 @@ c      allocate (rely(1-ih:mp+ih))
       allocate (u2(1-ih:np+ih,1-ih:mp+ih+1,l))
       allocate (u3(1-ih:np+ih,1-ih:mp+ih,l+1))
 ! FIXME KOO 
-! FP: this fix was incorrect : no need for ghost cells in flux arrays
-      allocate (fd1(np+1,mp, l))
-      allocate (fd2(np,mp+1, l))
-      allocate (fd3(np,mp, l+1))
-!      allocate (fd1(1-ih:np+ih+1,1-ih:mp+ih, l))
-!      allocate (fd2(1-ih:np+ih,1-ih:mp+ih+1, l))
-!      allocate (fd3(1-ih:np+ih,1-ih:mp+ih, l+1))
+!      allocate (fd1(np+1,mp, l))
+!      allocate (fd2(np,mp+1, l))
+!      allocate (fd3(np,mp, l+1))
+      allocate (fd1(1-ih:np+ih+1,1-ih:mp+ih, l))
+      allocate (fd2(1-ih:np+ih,1-ih:mp+ih+1, l))
+      allocate (fd3(1-ih:np+ih,1-ih:mp+ih, l+1))
 
       if (iord.eq.2) then
         allocate (v1(1-ih:np+ih+1,1-ih:mp+ih, l))

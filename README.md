@@ -8,4 +8,4 @@ FIRETEC OSS LICENSE is O5086
 
 #-------------------------------------------------------------------------
 
-This branch will host version of FIRETEC where some minor bugs in CODE3 were fixed to give the same result as CODE1. Fixes executed by Francois Pimont. See readme file in CODE for details about these changes.
+This branch will hosts the "stable" version of FIRETEC from January 2019 also known as CODE3.

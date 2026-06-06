@@ -11,24 +11,26 @@
       Implicit None
    
       integer :: i,j,k,kv
-      !FP09/2019 : KOO initially added these lines to make CODE3
-      !similar to CODE, but it is incorrect, especially when cyclic BC are on
-      ! because it uses 0 instead of cyclic values, so these lines were
-      ! removed again and f1avg were used in updated below (instead of
-      ! tmp)
-      !real,allocatable::tmp(:,:,:,:)
-      !allocate (tmp(1-ih:np+ih,1-ih:mp+ih,l,nv))
-      !tmp=0.0
+! FIXME 
+      real,allocatable::tmp(:,:,:,:)
+      allocate (tmp(1-ih:np+ih,1-ih:mp+ih,l,nv))
+      tmp=0.0
     
       !This array multiplied by a scalar can be written as a single line 
       u1(:,:,:)=u1(:,:,:)*0.5
       u2(:,:,:)=u2(:,:,:)*0.5
       u3(:,:,:)=u3(:,:,:)*0.5
-      call updated(f1avg,f1avg,np,mp,l,1-ih,np+ih,1-ih,mp+ih,0,0)
+
+      call updated(f1avg,tmp,np,mp,l,1-ih,np+ih,1-ih,mp+ih,0,0)
+!      call updated(f1avg,f1avg,np,mp,l,1-ih,np+ih,1-ih,mp+ih,0,0)
       call donorcell(f1avg,1-ih,np+ih,1-ih,mp+ih,l)
-      call updated(f2avg,f2avg,np,mp,l,1-ih,np+ih,1-ih,mp+ih,0,0)
+
+      call updated(f2avg,tmp,np,mp,l,1-ih,np+ih,1-ih,mp+ih,0,0)
+!      call updated(f2avg,f2avg,np,mp,l,1-ih,np+ih,1-ih,mp+ih,0,0)
       call donorcell(f2avg,1-ih,np+ih,1-ih,mp+ih,l)
-      call updated(f3avg,f3avg,np,mp,l,1-ih,np+ih,1-ih,mp+ih,0,0)
+
+      call updated(f3avg,tmp,np,mp,l,1-ih,np+ih,1-ih,mp+ih,0,0)
+!      call updated(f3avg,f3avg,np,mp,l,1-ih,np+ih,1-ih,mp+ih,0,0)
       call donorcell(f3avg,1-ih,np+ih,1-ih,mp+ih,l)
 
       do k=1,l

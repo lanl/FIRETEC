@@ -64,7 +64,6 @@ c material parameters
       !   cpwood=1800.         ! cp jack pine needles(estimated n Albini and stocks) (J/KG/K)
       !   rhomicrovalue=700.
       !end if
-      cpdirt=800.         ! cp wood (estimated from Incorpera, Dewitt) (J/KG/K)
       cpwater=4200.        ! cp for water (KJ/Kg/K)
       hwevap=2257.e3       ! energy needed for water evap at 373 K (Moran)(J/Kg)
       gammav=1.7        ! cp/cv for water vapor

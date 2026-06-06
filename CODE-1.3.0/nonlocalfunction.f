@@ -235,7 +235,7 @@ c     &        i,j,k,rhowater(i,j,k),rhos(i,j,k),
 c     &   rhof(i,j,k),psiwmax(i,j,k)
                   if (rhowater(i,j,k).lt.0.0) rhowater(i,j,k)=0.0
                   rhosold=rhos(i,j,k)
-                  rhos(i,j,k)=rhof(i,j,k)+rhowater(i,j,k)+rhodirt(i,j,k)
+                  rhos(i,j,k)=rhof(i,j,k)+rhowater(i,j,k)
 c                  rhosnph=(rhosold+rhos(i,j,k))/2
                   siesold=sies(i,j,k)
                   if(zla.le.fueldepth) then
@@ -247,7 +247,7 @@ c     &                   (rhosnph+.5*(rhos(i,j,k)-rhosold))   !rrl  7/9/05
      .                           +frhosies(i,j,k)
      .                         +0.5*frhosiesrad(i,j,k)*dtp)/rhos(i,j,k)
                      rmoist(i,j,k)=rhowater(i,j,k)/rhof(i,j,k)
-                     cpsolid(i,j,k)=(rhodirt(i,j,k)*cpdirt+rhof(i,j,k)*
+                     cpsolid(i,j,k)=(rhof(i,j,k)*
      &                              (cpwood+cpwater*rmoist(i,j,k)))
      &                              /rhos(i,j,k)
                      tempsold=temps(i,j,k)
@@ -977,7 +977,6 @@ c     tbar(i,j,k)=xv(i,j,k,4)/xv(i,j,k,nv)*(pr(i,j,k)*1.e-5)**(rg/cp)
       do i=1,np
                rrhomicro=1./rhomicro(i,j,k)
                sstemp=sizescale(i,j,k) !FP
-               if (rhodirt(i,j,k).ge.2.) sizescale(i,j,k)=.3 !FP
 
       rhogas=xv(i,j,k,nv)
 
@@ -1005,7 +1004,7 @@ c                  h=2*0.683*re**0.466*thermcondair/ss
 c      h=0.683*re**0.466*thermcondair/ss                          !rrl
 c      av=2.*(rhof(i,j,k)*0.004+rhowater(i,j,k)*.0001)/ss    !rrl
       av=2.*(rhof(i,j,k)*rrhomicro)/sizescale(i,j,k) !FP
-      sizescale(i,j,k)=sstemp  !FP               !added for rhodirt
+      sizescale(i,j,k)=sstemp  !FP
       tambientarray(i,j,k)=xe(i,j,k,4)/xe(i,j,k,nv)
      &      *(pre(i,j,k)*1.0e-5)**(rg/cp)
       convhtb=h*av*(temps(i,j,k)-tempg(i,j,k))
@@ -1109,8 +1108,6 @@ c    .2.*(tbar(i,j,k)*cv*xv(i,j,k,nv)-xv(i,j,k,4))
                rrhomicro=1./rhomicro(i,j,k)
                !sstemp=ss
                sstemp=sizescale(i,j,k) !FP
-               !if (rhodirt(i,j,k).gt.2.) ss=.3
-               if (rhodirt(i,j,k).gt.2.) sizescale(i,j,k)=.3 !FP
 
                if (rhof(i,j,k).gt.1.e-04) then
                   uref=xv(i,j,k,1)/xv(i,j,k,nv)
@@ -1145,7 +1142,7 @@ c    .2.*(tbar(i,j,k)*cv*xv(i,j,k,nv)-xv(i,j,k,4))
 c                  h=2*0.683*re**0.466*thermcondair/ss         !rrl*2
 c                  h=2*0.683*re**0.466*thermcondair/ss         !rrl*2
 c      av=2.*(rhof(i,j,k)*0.004+rhowater(i,j,k)*.0001)/ss      !rrl
-c      av=2.*(rhof(i,j,k)*.004+rhodirt(i,j,k)*.0008)/ss      !rrl
+c      av=2.*(rhof(i,j,k)*.004)/ss      !rrl
       av=2.*(rhof(i,j,k)*rrhomicro)/sizescale(i,j,k)      !rrl
       sizescale(i,j,k)=sstemp
 c      tg=xv(i,j,k,4)/xv(i,j,k,nv)*(pr(i,j,k)*1.0e5)**(rg/cp)  !rrl

@@ -142,15 +142,12 @@ c  update rhof, rhos, rhowater
         rhof(i,j,k)=rhof(i,j,k)+frhof
         rhowater(i,j,k)=max(0.0,rhowater(i,j,k)+frhowater)
         rhos(i,j,k)=rhof(i,j,k)+rhowater(i,j,k)
-        if (idirt.eq.1) rhos(i,j,k)=rhos(i,j,k)+rhodirt(i,j,k)
 c update sies, temps
          sies(i,j,k)=(sies(i,j,k)*rhosold+frhosies
      &                  +frhosiesrad(i,j,k)*dtp)/rhos(i,j,k)   !FP
            rmoist(i,j,k)=rhowater(i,j,k)/rhof(i,j,k)
            cpsolid(i,j,k)=rhof(i,j,k)* (cpwood+cpwater*rmoist(i,j,k))
      +                    /rhos(i,j,k)
-           if (idirt.eq.1) cpsolid(i,j,k) =cpsolid(i,j,k)+
-     +         rhodirt(i,j,k)*cpdirt/rhos(i,j,k)
            temps(i,j,k)=sies(i,j,k)/cpsolid(i,j,k)
 
         ! variable for gas phase
