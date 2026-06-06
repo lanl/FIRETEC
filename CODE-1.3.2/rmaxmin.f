@@ -25,7 +25,7 @@ c
      +                         'rhoo','rhoh','dens',' '/
       !JAS 3/6/06 added e3xplicit declarations to comply with implicit none
 ! KOO
-      character(len=13) :: srcfile = "  RMAXMIN for"
+!      character(len=13) :: srcfile = "  RMAXMIN for"
 
       integer :: kv
       real :: rmax,rmin,xmax,xmin,rmaxtheta,rmintheta,xmaxth,xminth
@@ -63,11 +63,11 @@ c  compute max and mim of data that is local to the process
      +                     mpi_comm_world,ierror)
            call mpi_reduce(rmintheta,xminth,1,mpi_real,mpi_min,0,
      +                     mpi_comm_world,ierror)
-!           if(mpi_rank.eq.0)write(6,*)' RMAXMIN for theta',
-!     +                      ' - max = ',xmaxth,' ,min = ',xminth
-           if(mpi_rank.eq.0)
-     +      write(6,'(a,1x,a," - max = ",es13.4," , min = ",es13.4)')
-     +      srcfile,'theta',xmaxth,xminth 
+           if(mpi_rank.eq.0)write(6,*)' RMAXMIN for theta',
+     +                      ' - max = ',xmaxth,' ,min = ',xminth
+!           if(mpi_rank.eq.0)
+!     +      write(6,'(a,1x,a," - max = ",es13.4," , min = ",es13.4)')
+!     +      srcfile,'theta',xmaxth,xminth 
 
            tmp(1:np,1:mp,1:lls)=tmp(1:np,1:mp,1:lls)*     ! tmp is T (K)
      +                  (pressure(1:np,1:mp,1:lls)/1.e5)**cap
@@ -80,11 +80,11 @@ c  compute max and mim of data that is local to the process
      +                   mpi_comm_world,ierror)
          call mpi_reduce(rmin,xmin,1,mpi_real,mpi_min,0,
      +                   mpi_comm_world,ierror)
-!         if(mpi_rank.eq.0) write(6,*)' RMAXMIN for ',names(kv),
-!     +                     ' - max = ',xmax,' ,min = ',xmin
-           if(mpi_rank.eq.0)
-     +      write(6,'(a,1x,a," - max = ",es13.4," , min = ",es13.4)')
-     +      srcfile,names(kv),xmax,xmin
+         if(mpi_rank.eq.0) write(6,*)' RMAXMIN for ',names(kv),
+     +                     ' - max = ',xmax,' ,min = ',xmin
+!           if(mpi_rank.eq.0)
+!     +      write(6,'(a,1x,a," - max = ",es13.4," , min = ",es13.4)')
+!     +      srcfile,names(kv),xmax,xmin
 
 ! KOO for finding location 
         if(kv.LT.4 .and. loc_prt.EQ.1) then

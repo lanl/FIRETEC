@@ -114,8 +114,6 @@
       real :: maxfueldepth1,maxfueldepth2,maxfueldepth3,maxfueldepth4
 ! if actual>maxfuldepth, cell 0 and 1 all zone are a mixture of gas and solid
       integer :: neumannbcs
-      !JAS debug block variables
-      integer :: sil,siu,sjl,sju,sk
  
       save
 
@@ -534,7 +532,8 @@
          aemit(i,j,k)=(rmaxsootcon*
      &                 (sqrt(max((.21-xvb(i,j,kreal,7)/xvb(i,j,kreal,nv)),0.0)/.21)))
      &                 *xvb(i,j,kreal,nv)
-         if(rhof(i,j,k).gt.min_rhof)
+         if(rhof(i,j,kreal).gt.min_rhof) ! FP09/2019 replaced the
+            !incorrect index k here by kreal
      &      papv(i,j,k) = (2.0/sizescale(i,j,kreal))*(rhof(i,j,kreal)/(4.0*rhomicro(i,j,kreal)))
          papvgas(i,j,k) = crad*aemit(i,j,k)*absemis(i,j,k)*0.25
          if (isootmodel.eq.1) then
@@ -552,22 +551,8 @@
            if(papvgas(i,j,k).gt.papvgasmax)
      +      papvgasmax = papvgas(i,j,k)
          endif
-         !JAS debug block!!!! 
-         sil = 20
-         siu = 21
-         sjl = 20
-         sju = 21
-         if(irad.eq.1)then
-          sk = nz+2
-         else
-          sk = 1+2
-         endif
          ia=(npos-1)*np+i
          ja=(mpos-1)*mp+j
-         !if(ia.ge.sil.and.ia.le.siu.and.ja.ge.sjl.and.ja.le.sju.and.k.eq.sk)then
-           ! papvgas(i,j,k) = 0.37
-         !endif
-         !END JAS debug block!!!! 
          papvtot(i,j,k) = papv(i,j,k)+papvgas(i,j,k)
         enddo  !do i
        enddo  !do j
@@ -625,7 +610,8 @@
       use turba 
       use xvo
       use constants
-      Implicit None
+      implicit None
+
 
       integer :: i,j,k,kreal,ia,ja
       real :: localterm,nbrterm,yterm!,pr
@@ -652,17 +638,18 @@
           !nbrterm accounts for neighbor influence on t4barsolid
           if(k.gt.llowlim)then
            frac=(1.0/6.0)*j3+.25*(1-j3)    !sets avg weight for 2-d or 3-d
-           nbrterm = csurr*frac*abs(tempg(i,j,kreal)-tempg(i,j,kreal-1))
+           nbrterm = csurr*frac*abs(temps(i,j,kreal)-temps(i,j,kreal-1))
           else
            frac=(1.0/5.0)*j3+.25*(1-j3)    !sets avg weight for 2-d or 3-d
            nbrterm = 0.0
           endif
-           yterm=abs(tempg(i,j,kreal)-tempg(i,j-j3,kreal))
-     &         +abs(tempg(i,j,kreal)-tempg(i,j+j3,kreal))
+          !FP09/2019 replaced incorrect tempg by temps here
+           yterm=abs(temps(i,j,kreal)-temps(i,j-j3,kreal))
+     &         +abs(temps(i,j,kreal)-temps(i,j+j3,kreal))
            nbrterm = nbrterm+csurr*frac*
-     &        (abs(tempg(i,j,kreal)-tempg(i-1,j,kreal))
-     &        +abs(tempg(i,j,kreal)-tempg(i+1,j,kreal))
-     &        +abs(tempg(i,j,kreal)-tempg(i,j,kreal+1)) 
+     &        (abs(temps(i,j,kreal)-temps(i-1,j,kreal))
+     &        +abs(temps(i,j,kreal)-temps(i+1,j,kreal))
+     &        +abs(temps(i,j,kreal)-temps(i,j,kreal+1)) 
      &        +yterm )
           !localterm accounts for local influence on t4barsolid
           localterm = camb*(temps(i,j,kreal)-tambientarray(i,j,kreal))
@@ -703,23 +690,6 @@
      &                    *(t4bar(i,j,k)+tambientarray(i,j,kreal)**2)*
      &                     5.67051e-8
          endif  !if(tempg.gt.tambientarray)
-         !JAS debug block!!! 
-         sil = 11!20
-         siu = 11!21
-         sjl = 11!20
-         sju = 11!21
-         if(irad.eq.1)then
-          sk = nz+2
-         else
-          sk = 3+2
-         endif
-       !  if(ia.ge.sil.and.ia.le.siu.and.ja.ge.sjl.and.ja.le.sju.and.k.eq.sk)then
-       !     sourcegas(i,j,k)=4.0*papvgas(i,j,k)
-      !&                 *(1000.0**4-tambientarray(i,j,k)**4)*
-      !&                  5.67051e-8
-          !  write(6,*)'mpi_rank,i,j,k, source = ',mpi_rank,i,j,k,sourcegas(i,j,k)
-         !endif
-         !! END JAS debug block!!! 
 
         enddo !do i
        enddo !do j
@@ -1868,11 +1838,6 @@ c
       !real :: keffbar,rl2,rl2old,rl22,rl2old2
       real,external :: zcart
       
-      !temp JAS debug variables
-      !real :: tmpsum
-      !integer :: tmpcnt,sil,siu,sjl,sju,sk
-      !end temp JAS debug variables
-
       !double precision :: wt1,wt2,wtick   !JAS adding timing routine variables
 
 

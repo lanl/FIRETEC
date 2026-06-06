@@ -88,10 +88,10 @@ c                 zla=zcart(z(k),i,j,zb)-zs(i,j)
         endif 
 
          if(mpi_rank.eq.0)then
-!                 write(6,*)'-RMAXMIN for ',string,
-!     +                              ' - max = ',xmax,' ,min = ',xmin
-          write(6,'(a,1x,a," - max = ",es13.4," , min = ",es13.4)')
-     +      '  RMAXMIN for',trim(string),xmax,xmin
+                 write(6,*)'-RMAXMIN for ',string,
+     +                              ' - max = ',xmax,' ,min = ',xmin
+!          write(6,'(a,1x,a," - max = ",es13.4," , min = ",es13.4)')
+!     +      '  RMAXMIN for',trim(string),xmax,xmin
          if(loc_prt.eq.1) then         
                  write(6,*)' :cell of maximum above is '
      &                              ,imaxtemp,jmaxtemp,kmaxtemp

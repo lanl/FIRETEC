@@ -154,9 +154,10 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       real,intent(inout):: rneteng !ff(i,j,k)*hf*(1.-thetasolid)
       real,intent(inout)::ff,fw !defined in fuel.f
       real:: gammaterm,rwatergainht,rnetmass,
-     +      rnetengwater,energy,capqterm
+     + energy,capqterm
       real::fi,frho,fox,frhovapor
-        frho=ff*dtp*rnfuel
+        !frho=ff*dtp*rnfuel
+        frho=(ff*rnfuel+fw)*dtp !FP added vapor mass that was missing
         !dti is already in it (turb.f) fox=(-ff*rno+0.5*foxb(i,j,k)*dti)*dtp
         fox=(-ff*rno+0.5*foxb(i,j,k))*dtp
 ! FP :This test is incorrect, as foxb can be positive
@@ -176,9 +177,9 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
         gammaterm=-convht(i,j,k)+firad(i,j,k)  !-qxt
         rwatergainht=fw*cpwater*twvap      !same as below
         rnetmass=ff*rnfuel*tcrit*cpwood+rwatergainht
-        rnetengwater=fw*cvvapor*twvap
-        if (irhovapor.eq.0) rnetengwater=0.0
-        energy=gammaterm+rneteng+rnetmass+rnetengwater
+        !FP after discussion with RRL 09/17/2019:
+        ! rnetengwater=fw*cvvapor*twvap  was incorrect (removed)
+        energy=gammaterm+rneteng+rnetmass
         pr(i,j,k)=(xvb(i,j,k,4)*rg/prrcp)**(cp/cv)
         capqterm=energy*(1.e5/pr(i,j,k))**(rg/cp)/cp !rrl
         fi=fib(i,j,k)*dtp+2.*capqterm*dtp

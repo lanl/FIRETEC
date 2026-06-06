@@ -615,7 +615,7 @@ c234567
       real arad,brad,crad
       real bx_new,by_new,bz_new,ux_fb,uy_fb,uz_fb
       real force_drag,force_grav,bh_max,br_max
-      integer i,j,k,ia,ja,ii,ita,jseed
+      integer i,j,k,ia,ja,ii,ita!,jseed
       integer ia_new,ja_new,ib_new,jb_new
       integer iscan_start,jscan_start,iscan_end,jscan_end
       integer nbmax1,nbmax2,nbmax3,nb_new,ibmax1,nb_cell
@@ -1193,8 +1193,8 @@ c      print*,"after move cell",ia,ja,ib,jb,kb
       integer,allocatable::iupd_fb(:,:),iupd_fb_imm(:,:)
       integer,allocatable::status(:)
 
-      integer imm_new,nupd,nsend(8),nrecv(8),nrecv_oa
-      integer iimm_new,inupd,isend(8),irecv(8),nsend_oa
+      integer imm_new,nupd,nsend(8),nrecv(8)!,nrecv_oa
+      integer iimm_new,inupd,isend(8),irecv(8)!,nsend_oa
       integer nbmax_o,nbmax_imm,nb,i,j,k
       integer imf,ifb,lnb,ifs,ir,ierr,ibsd,nbmax_new_imm
       integer nbmax_new,nbmax1,nbmax_imm1,nbmax2,maxnsend,maxnrecv
@@ -2312,7 +2312,8 @@ c234567890123456789012345678901234567890123456789012345678901234567890**
       Implicit None
       !include 'mpif.h'
 
-      integer nbmax_im,n_crt,n_ign
+      !integer nbmax_im,
+      integer n_crt,n_ign
       integer i,j,k
       real temp_cri
 

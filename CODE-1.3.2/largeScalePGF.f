@@ -194,8 +194,7 @@ c sum of the mass flux
        endif  
        if (ilspgf.eq.1) then 
          deltaf = (targMassFlux-(totMassFlux+(totMassFlux-oldTotMassFlux)))
-     +            /(dx*dy*n*m*rhoug*tau*intsintheta)
-         if (mpi_rank.eq.0) write(6,*) 'new deltaf, 1/10flspgf:', deltaf,0.1 * flspgf(1,1)
+     +            /(dx*dy*n*m*sqrt(rhoug**2.+rhovg**2.)*tau*intsintheta)
          flspgf = flspgf+deltaf
          if (totMassFlux.le.targMassFlux) then
            if (mpi_rank.eq.0) write(6,*) 'pressure gradient increased'
@@ -207,7 +206,7 @@ c sum of the mass flux
          do i=1,np
             currentFlux = fluxAlongWindDir(i, j)
             deltaf = (targMassFlux-nMassFlux*currentFlux)
-     +            /(dx*dy*n*m*rhoug*tau*intsintheta)
+     +            /(dx*dy*n*m*sqrt(rhoug**2.+rhovg**2.)*tau*intsintheta)
             flspgf(i,j) = flspgf(i,j) + deltaf
             !if (currentFlux.le.targMassFlux/nMassFlux) then
             !  flspgf(i,j)=1.1*flspgf(i,j)
@@ -231,8 +230,9 @@ c     ! gaussian filtering of flspgf array
         do i=1,np
           ia = (npos-1)*np + i
           ja = (mpos-1)*mp + j
-           if (flspgftmp(i,j,1).ne.flspgf2(ia,ja,1)) 
-     +    write(6,*) 'allgather3d pb:rank=',mpi_rank,i,j,ia,ja,flspgftmp(i,j,1),flspgf2(ia,ja,1)
+           if (flspgftmp(i,j,1).ne.flspgf2(ia,ja,1))then 
+         write(6,*) 'allgather3d pb:rank=',mpi_rank,i,j,ia,ja,flspgftmp(i,j,1),flspgf2(ia,ja,1)
+        endif
         enddo
       enddo
       ! footprint of filter n/5
