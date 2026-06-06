@@ -8,4 +8,4 @@ FIRETEC OSS LICENSE is O5086
 
 #-------------------------------------------------------------------------
 
-This branch hosts the first version of FIRETEC first introduced to version control in 2017 also known as CODE1. This code is only compatible with older versions of intel's fortran compiler.
+This branch will hosts the "stable" version of FIRETEC from January 2019 also known as CODE3.
