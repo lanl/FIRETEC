@@ -24,8 +24,7 @@ c2345678***************************************************
       integer,intent(in) :: il,iu,jl,ju,lls
 
       real xv(il:iu,jl:ju,lls,nv)
-!      integer::kv
-      integer::i,j,k
+      integer::kv
 
       !if (mpi_rank.eq.0) write(6,*) 'begin advec' 
       call setAdvectiveVelocities(uavg,vavg,oavg,gc1,gc2,gc3,il,iu,jl,ju,lls,iord) ! this is advvel in code. 
@@ -33,28 +32,28 @@ c2345678***************************************************
       !if (mpi_rank.eq.0) write(6,*) 'advective velocities computed' 
       if(iwallclock.EQ.1) call computeWallTime(wtime2,4,'advl')
       if(iwallclock.EQ.1) wtime2=MPI_Wtime() 
-!
-!!! mpdata is not working - change it to mpdatanew3d in code !!
-!!      do kv=1,nv
-!!        if (kv.ne.3) then 
-!!        call mpdata(xv(1-ih,1-ih,1,kv),h,il,iu,jl,ju,lls,0)
-!!        else  ! specific bc for w for bottom (w(0)=-w(1))
-!!        call mpdata(xv(1-ih,1-ih,1,kv),h,il,iu,jl,ju,lls,1)
-!!        endif
-!!!        call updated(xv(1-ih,1-ih,1,kv),xe(1-ih,1-ih,1,kv),np,mp,l,1-ih,np+ih,1-ih,mp+ih,1,0)
-!!      enddo
 
-!     call mpdatanew3d(u1,u2,u3,xv,h,xe,il,iu,jl,ju,ll,nv) 
-
-      call mpdatanew3d(xv,h,xe,il,iu,jl,ju,lls,nv)
-
+      if (impdataold==0) then
+!!!FP092019 the new implementation of mpdata might be incorrect in case
+!of topo 
+        do kv=1,nv
+          if (kv.ne.3) then 
+            call mpdata(xv(1-ih,1-ih,1,kv),xe(1-ih,1-ih,1,kv),h,il,iu,jl,ju,lls,0)
+          else  ! specific bc for w for bottom (w(0)=-w(1))
+            call mpdata(xv(1-ih,1-ih,1,kv),xe(1-ih,1-ih,1,kv),h,il,iu,jl,ju,lls,1)
+          endif
+          !call updated(xv(1-ih,1-ih,1,kv),xe(1-ih,1-ih,1,kv),np,mp,l,1-ih,np+ih,1-ih,mp+ih,1,0)
+        enddo
+      else
+        call mpdataold(xv,h,xe,il,iu,jl,ju,lls,nv)
+      endif
 
       if(iwallclock.EQ.1) call computeWallTime(wtime2,11,'advc')
       !if (mpi_rank.eq.0) write(6,*) 'end advection'
       return
       end subroutine advec
 !*****************************************************************************************!
-      subroutine mpdatanew3d(x,h,xe,il,iu,jl,ju,lls,nvp)
+      subroutine mpdataold(x,h,xe,il,iu,jl,ju,lls,nvp)
       use gridsetup
       use msga
       use advo ! code2-where u1,u2,u3 are defined. 
@@ -1375,7 +1374,7 @@ c     endif
 2500  continue
 
       return
-      end subroutine mpdatanew3d
+      end subroutine mpdataold
 
 !*****************************************************************************************!
       
@@ -1383,13 +1382,13 @@ c     endif
 ! high order advection scheme for large time step, based on mpdata -
 ! this is FP's version, which doesn't have nonos, nonosold option
 !****************************************************************************************
-      subroutine mpdata(xv,h,il,iu,jl,ju,lls,isW) ! xe deleted from 2nd argument
+      subroutine mpdata(xv,xe,h,il,iu,jl,ju,lls,isW) ! xe deleted from 2nd argument
       use gridsetup
       use advo
       use msga
       Implicit None
       integer,intent(in) :: il,iu,jl,ju,lls
-      real,dimension(il:iu,jl:ju,lls) :: xv ! ,xe
+      real,dimension(il:iu,jl:ju,lls) :: xv,xe
       real,dimension(il:iu,jl:ju,lls) :: h
       integer :: i,j,k, kp1,km1    !,k0
       real :: ha, fluxIn, fluxOut
@@ -1399,9 +1398,7 @@ c     endif
 
       eps = 1e-15
 
-!      call updated(xv,xe,np,mp,l,1-ih,np+ih,1-ih,mp+ih,0,0)
-! FIXME 
-       call updated(xv,xv,np,mp,l,1-ih,np+ih,1-ih,mp+ih,0,0)
+      call updated(xv,xe,np,mp,l,1-ih,np+ih,1-ih,mp+ih,0,0)
 ! compute donor cell      
       do k=1,l
        do j=1,mp
@@ -1465,10 +1462,7 @@ c     endif
        enddo
       enddo 
 
-!      call updated(xv,xe,np,mp,l,1-ih,np+ih,1-ih,mp+ih,1,0)
-! FIXME 
-       call updated(xv,xv,np,mp,l,1-ih,np+ih,1-ih,mp+ih,1,0)
-
+      call updated(xv,xe,np,mp,l,1-ih,np+ih,1-ih,mp+ih,1,0)
 
 ! update of pmx and pmn with new xv from donor cell
       do k=1,l

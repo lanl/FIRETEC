@@ -1,8 +1,9 @@
-#-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
 
-© 2026. Triad National Security, LLC. All rights reserved. This program was produced under U.S. Government contract 89233218CNA000001 for Los Alamos National Laboratory (LANL), which is operated by Triad National Security, LLC for the U.S. Department of Energy/National Nuclear Security Administration. All rights in the program are reserved by Triad National Security, LLC, and the U.S. Department of Energy/National Nuclear Security Administration. The Government is granted for itself and others acting on its behalf a nonexclusive, paid-up, irrevocable worldwide license in this material to reproduce, prepare. derivative works, distribute copies to the public, perform publicly and display publicly, and to permit others to do so.
+!© 2026. Triad National Security, LLC. All rights reserved. This program was produced under U.S. Government contract 89233218CNA000001 for Los Alamos National Laboratory (LANL), which is operated by Triad National Security, LLC for the U.S. Department of Energy/National Nuclear Security Administration. All rights in the program are reserved by Triad National Security, LLC, and the U.S. Department of Energy/National Nuclear Security Administration. The Government is granted for itself and others acting on its behalf a nonexclusive, paid-up, irrevocable worldwide license in this material to reproduce, prepare. derivative works, distribute copies to the public, perform publicly and display publicly, and to permit others to do so.
 
-#-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
       program compress
 
       use gridsetup
@@ -42,7 +43,6 @@
       !JAS not used --common/rlookup/ ifa,ifb,ifc,ifd
       character(len=257)::pfilename ,fname
       integer :: ierr 
-      integer :: iv ! FIXME
  
 c     character end*10,fname*60
       data nplwrites /0/ !JAS not used -- nreswrites /0/
@@ -63,12 +63,12 @@ c
      .ius,iue,jus,jue,
      .slopeangle,slopeazimuth,
       !.st,
-     .iord,isor,nonos,idiv,nfct,nonosold,
-     .ifuelinra,fuelinranumber,ifuel,ivegread,
+     .iord,impdataold,isor,nonos,idiv,nfct,nonosold,
+     .ifuelinra,fuelinranumber,ifuel,idirt,ivegread,
      .rhomicrovalue, cpwood,
      .kmax,kf77max,frqoutput,outname,frqfilstr,
      .restartfile,ioextra,topofile,ipotflow,
-     .isoturb,ibctopbot,ignfile,icfmeflag,
+     .isoturb,ibctopbot,ignfile,igniteVerticalExtent,icfmeflag,
      & windfieldstartfile,xvbdataname,
      +iwindfieldout,iwindfieldin,windspeedupfactor,itwindfield, !JMC 10/7/6
      &itinterp,ibcells,jbcells,  !JMC 10/7/6
@@ -196,12 +196,14 @@ c
       call MPI_Bcast(slopeazimuth,1,mpi_real,0,mpi_comm_world,ierr)
       !call MPI_Bcast(st,1,mpi_real,0,mpi_comm_world,ierr)
       call MPI_Bcast(iord,1,mpi_integer,0,mpi_comm_world,ierr)
+      call MPI_Bcast(impdataold,1,mpi_integer,0,mpi_comm_world,ierr)
       call MPI_Bcast(isor,1,mpi_integer,0,mpi_comm_world,ierr)
       call MPI_Bcast(nonos,1,mpi_integer,0,mpi_comm_world,ierr)
       call MPI_Bcast(idiv,1,mpi_integer,0,mpi_comm_world,ierr)
       call MPI_Bcast(nfct,1,mpi_integer,0,mpi_comm_world,ierr)
       call MPI_Bcast(nonosold,1,mpi_integer,0,mpi_comm_world,ierr)
       call MPI_Bcast(ifuel,1,mpi_integer,0,mpi_comm_world,ierr)
+      call MPI_Bcast(idirt,1,mpi_integer,0,mpi_comm_world,ierr)
       call MPI_Bcast(ivegread,1,mpi_integer,0,mpi_comm_world,ierr)
       call MPI_Bcast(cpwood,1,mpi_real,0,mpi_comm_world,ierr)
       call MPI_Bcast(rhomicrovalue,1,mpi_real,0,mpi_comm_world,ierr)
@@ -234,7 +236,7 @@ c
       if (mpi_rank==0) clength=len(ignfile)   !get length of ignfile so MPI_Bcast knows how long this character string is
       call MPI_Bcast(clength,1,mpi_integer,0,mpi_comm_world,ierr)
       call MPI_Bcast(ignfile,clength,mpi_character,0,mpi_comm_world,ierr)
-      
+      call MPI_Bcast(igniteVerticalExtent,1,mpi_integer,0,mpi_comm_world,ierr)
       call MPI_Bcast(icfmeflag,1,mpi_integer,0,mpi_comm_world,ierr)
 
 !JMC added flags to gridlist for reading windfields
@@ -324,65 +326,7 @@ c**************************************************************
             xv(i,j,k,3)=xvb(i,j,k,3)
             xv(i,j,k,4)=xvb(i,j,k,4)
             xv(i,j,k,5)=xvb(i,j,k,nv)
-
-!          if(it.eq.1) then 
-!             open(7209,file='xvb.history',form='formatted',
-!     +                 status='unknown') 
-!             write(7209,182) it,xvb(i,j,k,1),xvb(i,j,k,2),xvb(i,j,k,3)
-!     +            ,xvb(i,j,k,4),xvb(i,j,k,5),xvb(i,j,k,6)
-!     +            ,xvb(i,j,k,7),xvb(i,j,k,8),pr(i,j,k)  
-!          else ! it.eq.1
-!             if(dts.eq.0.001) then 
-!               if(MOD(it+1,2).eq.0) then  
-!             open(7209,file='xvb.history',form='formatted',
-!     +                 status='unknown',position='append') 
-!             write(7209,182) it,xvb(i,j,k,1),xvb(i,j,k,2),xvb(i,j,k,3)
-!     +            ,xvb(i,j,k,4),xvb(i,j,k,5),xvb(i,j,k,6)
-!     +            ,xvb(i,j,k,7),xvb(i,j,k,8),pr(i,j,k)
-!               endif   
-!
-!             else if(dts.eq.0.0005) then
-!               if(MOD(it+3,4).eq.0) then
-!             open(7209,file='xvb.history',form='formatted',
-!     +                 status='unknown',position='append')
-!             write(7209,182) it,xvb(i,j,k,1),xvb(i,j,k,2),xvb(i,j,k,3)
-!     +            ,xvb(i,j,k,4),xvb(i,j,k,5),xvb(i,j,k,6)
-!     +            ,xvb(i,j,k,7),xvb(i,j,k,8),pr(i,j,k)
-!               endif
-!       
-!             else 
-!             open(7209,file='xvb.history',form='formatted',
-!     +                 status='unknown',position='append')         
-!             write(7209,182) it,xvb(i,j,k,1),xvb(i,j,k,2),xvb(i,j,k,3)
-!     +            ,xvb(i,j,k,4),xvb(i,j,k,5),xvb(i,j,k,6)
-!     +            ,xvb(i,j,k,7),xvb(i,j,k,8),pr(i,j,k)
-!          endif           
-!
-!182     format(I3,F9.5,F9.5,F9.5,F9.4,F9.5,F9.6,F9.6,F9.5,F13.2)  
-!          endif 
-
-          if(xvb(i,j,k,7)/xvb(i,j,k,8).GT.0.22
-     +     .or. xvb(i,j,k,4)/xvb(i,j,k,8).LT.270) then
-
-          print*,'ijkmpi',i,j,k,mpi_rank,it
-          print*,'xvb123',xvb(i,j,k,1),xvb(i,j,k,2),xvb(i,j,k,3)
-          print*,'xvb456',xvb(i,j,k,4),xvb(i,j,k,5),xvb(i,j,k,6)
-          print*,'xvb78p',xvb(i,j,k,7),xvb(i,j,k,8),xvb(i,j,k,7)/xvb(i,j,k,8)
-          print*,'temp',temps(i,j,k),tempg(i,j,k),xvb(i,j,k,4)/xvb(i,j,k,8),pr(i,j,k)
-
-          STOP 
-
-          endif 
-
-          do iv=1, nv 
-             if(xvb(i,j,k,iv).NE.xvb(i,j,k,iv) .or.
-     +          xvb(i,j,k,iv)+1.EQ.xvb(i,j,k,iv)) then
-           print*,'NaN',i,j,k,iv,xvb(i,j,k,iv)
-           STOP 
-             endif 
-          enddo          
-
-
+! 09/2019FP Here removed a bunch of print statements
           enddo
         enddo
       enddo

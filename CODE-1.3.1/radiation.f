@@ -534,7 +534,7 @@
          aemit(i,j,k)=(rmaxsootcon*
      &                 (sqrt(max((.21-xvb(i,j,kreal,7)/xvb(i,j,kreal,nv)),0.0)/.21)))
      &                 *xvb(i,j,kreal,nv)
-         if(rhof(i,j,kreal).gt.min_rhof)
+         if(rhof(i,j,k).gt.min_rhof)
      &      papv(i,j,k) = (2.0/sizescale(i,j,kreal))*(rhof(i,j,kreal)/(4.0*rhomicro(i,j,kreal)))
          papvgas(i,j,k) = crad*aemit(i,j,k)*absemis(i,j,k)*0.25
          if (isootmodel.eq.1) then
@@ -652,17 +652,17 @@
           !nbrterm accounts for neighbor influence on t4barsolid
           if(k.gt.llowlim)then
            frac=(1.0/6.0)*j3+.25*(1-j3)    !sets avg weight for 2-d or 3-d
-           nbrterm = csurr*frac*abs(temps(i,j,kreal)-temps(i,j,kreal-1))
+           nbrterm = csurr*frac*abs(tempg(i,j,kreal)-tempg(i,j,kreal-1))
           else
            frac=(1.0/5.0)*j3+.25*(1-j3)    !sets avg weight for 2-d or 3-d
            nbrterm = 0.0
           endif
-           yterm=abs(temps(i,j,kreal)-temps(i,j-j3,kreal))
-     &         +abs(temps(i,j,kreal)-temps(i,j+j3,kreal))
+           yterm=abs(tempg(i,j,kreal)-tempg(i,j-j3,kreal))
+     &         +abs(tempg(i,j,kreal)-tempg(i,j+j3,kreal))
            nbrterm = nbrterm+csurr*frac*
-     &        (abs(temps(i,j,kreal)-temps(i-1,j,kreal))
-     &        +abs(temps(i,j,kreal)-temps(i+1,j,kreal))
-     &        +abs(temps(i,j,kreal)-temps(i,j,kreal+1)) 
+     &        (abs(tempg(i,j,kreal)-tempg(i-1,j,kreal))
+     &        +abs(tempg(i,j,kreal)-tempg(i+1,j,kreal))
+     &        +abs(tempg(i,j,kreal)-tempg(i,j,kreal+1)) 
      &        +yterm )
           !localterm accounts for local influence on t4barsolid
           localterm = camb*(temps(i,j,kreal)-tambientarray(i,j,kreal))

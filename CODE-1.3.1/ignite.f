@@ -5,6 +5,9 @@ c2345678***************************************************
 
         integer::igntype !flag for ignition type 0=none,1=rinitfire,2=terratorch,
                          !  3=multiple rinitfire,4=aerial,5=atv/driptorch
+        integer::igniteVerticalExtent=0 ! flag for ignition vertical
+                ! extent : when 0, whole canopy. When for example eq.3 only cells
+                ! with k<=3 will be ignited 
         integer::numignpts !number of points in ignition file
         integer,allocatable::ignpts(:,:)
         real::targettemp,startigntime,endigntime,ramprate

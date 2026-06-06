@@ -75,7 +75,8 @@ c                          !islip =1 is no slip bcs at z=0
        integer::jue=0 ! extension of reference zone in the domain for uswitch=2 (default  is m)
        integer::windspeedupfactor=1 ! ratio between wind time step versus fire time step
       integer::iord,isor,nonos,idiv,nfct,nonosold
-      integer::ifuel,ifuelinra,ivegread,kmax,kf77max
+      integer::impdataold=1 ! FP2019: decide if we want the old mpdata
+      integer::ifuel,ifuelinra,idirt,ivegread,kmax,kf77max
       integer::fuelinranumber 
 c          !pdf selector
 c             !fuel type specifier
@@ -323,7 +324,11 @@ c2345678***************************************************
       integer:: isoturb
       integer:: ilapdo
       real::diffcst ! diffusion cst (=0.09)
-      real::rturbprandtl ! inverse of the turbulent prandtl number (usually between 1 and 3)
+      !real::rturbprandtl ! inverse of the turbulent prandtl number (usually between 1 and 3)
+      !FP09/2019 hard coded an reasonable value for the inverse prandtl
+      !number, in case it is not defined in gridlist to avoid
+      !rturbprandtl=0  by default
+      real::rturbprandtl=2 ! inverse of the turbulent prandtl number (usually between 1 and 3)
       real::kbcratio
       end module turba
 
@@ -364,7 +369,7 @@ c2345678***************************************************
       integer,allocatable:: ifirestart(:, :,:)
       real,allocatable:: frhosiesrad(:,:,:)
       real,allocatable:: rmoist(:, :,:),
-     .       rhos(:,:,:),
+     .       rhos(:,:,:),rhodirt(:,:,:),
      .   rhowater(:, :,:),
      .    cpsolid(:, :,:),
      .       sies(:, :,:),
@@ -491,7 +496,7 @@ c2345678***************************************************
       real ::rsourceht,gamma,gammo
       real ::ep
       real ::rhomicrovalue
-      real ::tfire,cpwood,cpwater,hwevap,gammav
+      real ::tfire,cpwood,cpwater,hwevap,gammav,cpdirt
       real ::twvap,tcrit,tstep
       real ::cvvapor,cvoxygen
       real ::thermcondair=33.8e-3 

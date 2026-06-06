@@ -1,4 +1,6 @@
- this version combines recent modification of FP on lspgf (to allow diagonal wind with variable values of lspgf),
+README done by FP probably around 2016 for CODE2
+ 
+this version combines recent modification of FP on lspgf (to allow diagonal wind with variable values of lspgf),
 some minor additions to firetec (intent, new ignition pattern),
 - large scale pgf has been refactored :
   + mode 1= cste lspgf (previously mode 2), mode 2= unisotropic lspgf (limiting streak functionality, previously mode 3) , mode 3= smoothed unisotropic lspgf (limiting streak functionality, prviously mode 4)

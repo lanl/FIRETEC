@@ -29,7 +29,6 @@
       use updatedFields
       use turba
       use xvo
-!      use xve, only:xe
       use metryic
       use msga
 
@@ -56,9 +55,6 @@
      .  ,sqrtG_KG32a, sqrtG_KG33a !  edge values of sqrtG_KGij
       real:: px,py,pz ! phi derivative on model grid
       real ::r
-
-! noise filter 
-      real :: phi_diff1, phi_diff2, phi_diff3, phi_diff4, phi_diff5 
       
       hdxi=0.5*dxi
       hdyi=0.5*dyi
@@ -69,32 +65,20 @@
 ! computation of diffusion constant
       if (iflag.eq.1) ! theta, O2, rhovapor
      + cdiff=rturbprandtl !2
-
+       
 ! compute contravariant component x-flux at (i-1/2,j,k) hxc (sqrt(g) burried in...
 ! top bc of phi is hardcoded kp1=l when k=l
       do k=1,l
        kp1=k+1
-       if (k.EQ.l) kp1 = l
+       if (k==l) kp1 = l
        do j=1,mp
         do i=1,np+1
          !at i-1/2
           sqrtG_KG11a=0.5*(sqrtG_Kxy(i,j,k)+sqrtG_Kxy(i-1,j,k))
         ! sqrtG_KG12a=0
           sqrtG_KG13a=0.5*(sqrtG_Kxy(i,j,k)*c13(i,j)*gmul(k)+sqrtG_Kxy(i-1,j,k)*c13(i-1,j)*gmul(k))
-!          px = (phi(i,j,k)-phi(i-1,j,k))*dxi
-!          pz = 0.5*(phi(i,j,kp1)-phi(i,j,k-1)+phi(i-1,j,kp1)-phi(i-1,j,k-1))*hdzi !at i-1/2
-
-! Noise filter
-            phi_diff1 = phi(i,j,k)-phi(i-1,j,k)
-            if(abs(phi_diff1*1E+6).LT.phi(i,j,k)) phi_diff1=0.0
-          px = phi_diff1 * dxi
-
-            phi_diff2 = phi(i,j,kp1)-phi(i,j,k-1)
-            if(abs(phi_diff2*1E+6).LT.phi(i,j,k)) phi_diff2=0.0
-            phi_diff3 = phi(i-1,j,kp1)-phi(i-1,j,k-1) 
-            if(abs(phi_diff3*1E+6).LT.phi(i,j,k)) phi_diff3=0.0
-          pz =0.5 * (phi_diff2 + phi_diff3) * hdzi !ati-1/2
-            
+          px = (phi(i,j,k)-phi(i-1,j,k))*dxi
+          pz = 0.5*(phi(i,j,kp1)-phi(i,j,k-1)+phi(i-1,j,kp1)-phi(i-1,j,k-1))*hdzi !at i-1/2
           ! compute contravariant flux*sqrt(g):
           hxc(i,j,k) = sqrtG_KG11a * px + sqrtG_KG13a * pz  
         end do
@@ -105,99 +89,43 @@
 ! top bc of phi is hardcoded kp1=l when k=l
        do k=1,l
         kp1=k+1
-        if (k.EQ.l) kp1 = l
+        if (k==l) kp1 = l
         do i=1,np
          do j=1,mp+1                 
           !at j-1/2
          ! sqrtG_KG22a=0
           sqrtG_KG22a=0.5*(sqrtG_Kxy(i,j,k)+sqrtG_Kxy(i,j-1,k))
           sqrtG_KG23a=0.5*(sqrtG_Kxy(i,j,k)*c23(i,j)*gmul(k)+sqrtG_Kxy(i,j-1,k)*c23(i,j-1)*gmul(k))
-!          py = (phi(i,j,k)-phi(i,j-1,k))*dyi
-!          pz = 0.5*(phi(i,j,kp1)-phi(i,j,k-1)+phi(i,j-1,kp1)-phi(i,j-1,k-1))*hdzi
-
-! Noise filter
-              phi_diff1 = phi(i,j,k)-phi(i,j-1,k)
-              if(abs(phi_diff1*1E+6).LT.phi(i,j,k)) phi_diff1=0.0
-           py= phi_diff1 * dyi
-        
-              phi_diff2 = phi(i,j,kp1)-phi(i,j,k-1)
-              if(abs(phi_diff2*1E+6).LT.phi(i,j,k)) phi_diff2=0.0
-              phi_diff3 = phi(i,j-1,kp1)-phi(i,j-1,k-1)
-              if(abs(phi_diff3*1E+6).LT.phi(i,j,k)) phi_diff3=0.0
-           pz = 0.5 * (phi_diff2 + phi_diff3) * hdzi 
-
+          py = (phi(i,j,k)-phi(i,j-1,k))*dyi
+          pz = 0.5*(phi(i,j,kp1)-phi(i,j,k-1)+phi(i,j-1,kp1)-phi(i,j-1,k-1))*hdzi
           ! compute contravariant flux*sqrt(g):
           hyc(i,j,k) = sqrtG_KG22a * py + sqrtG_KG23a * pz 
          end do
         end do
        end do
-
+      
 ! compute contravariant component z-flux at i,j,k-1/2 hzc (sqrtg burried in)
 ! top boundary condition on phi, rvtxy, rvtya is burried here (kk=l when k=l+1)
       do k=1,l+1
        km1=k-1
        kk=k
-       if (k.EQ.1) km1=k
-       if (k.EQ.l+1) kk=l
+       if (k==1) km1=k
+       if (k==l+1) kk=l
        do j=1,mp
         do i=1,np
           !at k-1/2
           sqrtG_KG31a=0.5*(sqrtG_Kxy(i,j,kk)*c13(i,j)*gmul(kk)+sqrtG_Kxy(i,j,km1)*c13(i,j)*gmul(km1))
           sqrtG_KG32a=0.5*(sqrtG_Kxy(i,j,kk)*c23(i,j)*gmul(kk)+sqrtG_Kxy(i,j,km1)*c23(i,j)*gmul(km1))
           sqrtG_KG33a=0.5*(sqrtG_KG33(i,j,kk)+sqrtG_KG33(i,j,km1))
-!          px = 0.5*(phi(i+1,j,kk)-phi(i-1,j,kk)+phi(i+1,j,k-1)-phi(i-1,j,k-1))*hdxi !at k-1/2
-!          py = 0.5*(phi(i,j+1,kk)-phi(i,j-1,kk)+phi(i,j+1,k-1)+phi(i,j-1,k-1))*hdyi  !at k-1/2
-!          pz = (phi(i,j,kk)-phi(i,j,k-1))*dzi
-
-!          px =0.5*(phi(i+1,j,kk)-phi(i-1,j,kk)+phi(i+1,j,km1)-phi(i-1,j,km1))*hdxi !at k-1/2
-!          py =0.5*(phi(i,j+1,kk)-phi(i,j-1,kk)+phi(i,j+1,km1)-phi(i,j-1,km1))*hdyi !at k-1/2
-!          pz = (phi(i,j,kk)-phi(i,j,km1))*dzi
-
-! Noise filter
-              phi_diff1 = phi(i+1,j,kk)-phi(i-1,j,kk)
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> parent of 89206f4... minor bug fix on diffuse.f
-              if(abs(phi_diff1*1E+6).LT.phi(i,j,kk)) phi_diff1=0.0
-              phi_diff2 = phi(i+1,j,km1)-phi(i-1,j,km1)
-              if(abs(phi_diff2*1E+6).LT.phi(i,j,kk)) phi_diff2=0.0
-           px = 0.5 * (phi_diff1 + phi_diff2) * hdxi 
-
-              phi_diff3 = phi(i,j+1,kk)-phi(i,j-1,kk)
-              if(abs(phi_diff3*1E+6).LT.phi(i,j,kk)) phi_diff3=0.0
-              phi_diff4 = phi(i,j+1,km1)-phi(i,j-1,km1)
-              if(abs(phi_diff4*1E+6).LT.phi(i,j,kk)) phi_diff4=0.0
-           py = 0.5 * (phi_diff3 + phi_diff4) * hdyi
-
-              phi_diff5 = phi(i,j,kk)-phi(i,j,km1) 
-              if(abs(phi_diff5*1E+6).LT.phi(i,j,kk)) phi_diff5=0.0
-<<<<<<< HEAD
-=======
-=======
-              if(abs(phi_diff1*1E+6).LT.phi(i,j,k)) phi_diff1=0.0
-              phi_diff2 = phi(i+1,j,km1)-phi(i-1,j,km1)
-              if(abs(phi_diff2*1E+6).LT.phi(i,j,k)) phi_diff2=0.0
-           px = 0.5 * (phi_diff1 + phi_diff2) * hdxi 
-
-              phi_diff3 = phi(i,j+1,kk)-phi(i,j-1,kk)
-              if(abs(phi_diff3*1E+6).LT.phi(i,j,k)) phi_diff3=0.0
-              phi_diff4 = phi(i,j+1,km1)-phi(i,j-1,km1)
-              if(abs(phi_diff4*1E+6).LT.phi(i,j,k)) phi_diff4=0.0
-           py = 0.5 * (phi_diff3 + phi_diff4) * hdyi
-
-              phi_diff5 = phi(i,j,kk)-phi(i,j,km1) 
-              if(abs(phi_diff5*1E+6).LT.phi(i,j,k)) phi_diff5=0.0
->>>>>>> 8096211... fix bugs in diffuse.f
->>>>>>> parent of 89206f4... minor bug fix on diffuse.f
-           pz = phi_diff5 * dzi
-
+          px = 0.5*(phi(i+1,j,kk)-phi(i-1,j,kk)+phi(i+1,j,k-1)-phi(i-1,j,k-1))*hdxi !at k-1/2
+          py = 0.5*(phi(i,j+1,kk)-phi(i,j-1,kk)+phi(i,j+1,k-1)+phi(i,j-1,k-1))*hdyi  !at k-1/2
+          pz = (phi(i,j,kk)-phi(i,j,k-1))*dzi
           ! compute contravariant flux *sqrt(g):
           hzc(i,j,k)=sqrtG_KG31a * px +sqrtG_KG32a * py + sqrtG_KG33a * pz
         end do
        end do
       end do
-
+ 
 ! compute Laplacian term
       do k=1,l
         do j=1,mp
@@ -209,8 +137,8 @@
          end do
       end do
 
-! TODO check why we do this update :
-!     call updated(fphi,fphi,np,mp,l,1-ih,np+ih,1-ih,mp+ih,1)
+ ! TODO check why we do this update :
+ !     call updated(fphi,fphi,np,mp,l,1-ih,np+ih,1-ih,mp+ih,1)
       deallocate (hxc)
       deallocate (hyc)
       deallocate (hzc)

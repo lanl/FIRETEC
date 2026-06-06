@@ -19,6 +19,10 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       real :: sp,re,h,av
       !if (k.gt.lfuel) return
             sstemp=sizescale(i,j,k)
+            if(idirt.eq.1) then
+              if(rhodirt(i,j,k).gt.2.)
+     +          sstemp=.3
+            endif
             if(irhovapor.eq.1) rhovapor=xvb(i,j,k,8)
 
 c computation of sp (velocity in fuel + turbulence)

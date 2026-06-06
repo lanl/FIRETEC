@@ -294,11 +294,12 @@
        enddo
       endif
 
-! FIXME KOO to make CODE2 same as CODE1 
-
-       call updated(fd1,fd1,np,mp,l,1-ih,np+ih+1,1-ih,mp+ih,2,0) 
-       call updated(fd2,fd2,np,mp,l,1-ih,np+ih,1-ih,mp+ih+1,3,0) 
-      
+! KOO to make CODE2 same as CODE1 by adding these two update (and adding
+! halo cell in defineArray), but 
+! FP09/2009: this "fix" was incorrect because CODE1 was incorrect 
+!       call updated(fd1,fd1,np,mp,l,1-ih,np+ih+1,1-ih,mp+ih,2,0) 
+!       call updated(fd2,fd2,np,mp,l,1-ih,np+ih,1-ih,mp+ih+1,3,0) 
+ 
       do k=1,l
        do j=1,mp
         do i=1,np
@@ -350,6 +351,8 @@
       do k=1,l
         do j=1,mp
           do i=1,np
+! FP: NB this double precision pressure was added, but it does not seem 
+! to affect the results at least on early time steps (09/2019)
 !            pr(i,j,k)=(xv(i,j,k,4)*rg/prrcp)**(cp/cv)-pre(i,j,k)
             pr_double=(xv(i,j,k,4)*rg/prrcp)**(cp/cv)-pre(i,j,k) 
             pr(i,j,k)=real(pr_double)

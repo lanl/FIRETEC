@@ -56,6 +56,7 @@ c init water vapor
       endif !irst.eq.0
 
       rmoist=0   ! wss change 12/18/00
+      if (idirt.eq.1) rhodirt=0   ! rrl change 9/20/01
       rhofinitial=0.0
       rhof=0.0
 
@@ -135,7 +136,7 @@ c                if (ifuelseg.eq.2.and.k.eq.2)    ifueltype=20
                   fueldistributionslope=0.         !pos numbers mean the load is higher at the top kg/m^3/m
                   actualgroundload=0.25 !1.0   !fuel load at the ground if a linear extrapolation was done
                   rhomicro(i,j,k)=500.              !kg/m^3
-                elseif (ifueltype.eq.0) then
+                elseif (ifueltype.eq.0.and.rhodirt(i,j,k).lt.10) then
                   actualfuelheight=.7
                   actualfuelbottom= 0.            ! inserting 0 for ground
                   fueldistributionslope=0.         !pos numbers mean the load is higher at the top kg/m^3/m
@@ -196,8 +197,11 @@ c    &                 zbottomcell,ztopcell,' rhof=',rhof(i,j,k)
               sizescale(i,j,k)=amax1(sizescale(i,j,k),ss)
               rhowater(i,j,k)=rmoist(i,j,k)*rhof(i,j,k)
               rhos(i,j,k)=rhof(i,j,k)*(1.+rmoist(i,j,k))
+              if (idirt.eq.1) rhos(i,j,k)=rhodirt(i,j,k)+rhos(i,j,k)
               cpsolid(i,j,k)=(rhof(i,j,k)*cpwood
      &             +cpwater*rmoist(i,j,k)*rhof(i,j,k))/rhos(i,j,k)
+              if (idirt.eq.1) cpsolid(i,j,k)=cpsolid(i,j,k)+
+     +              rhodirt(i,j,k)*cpdirt/rhos(i,j,k)
               rhofinitial(i,j,k)=rhof(i,j,k)
               temps(i,j,k)=xe(i,j,k,4)*(pre(i,j,k)*1.e-5)**(rg/cp)
      &                  /xe(i,j,k,nv)
@@ -235,8 +239,11 @@ c END OF DEFINITION COMMON TO irst=0 and 2
               rmoist(i,j,k)=rhowater(i,j,k)/rhof(i,j,k)
               !rhowater(i,j,k)=rmoist(i,j,k)*rhof(i,j,k)
               rhos(i,j,k)=rhof(i,j,k)*(1.+rmoist(i,j,k))
+              if (idirt.eq.1) rhos(i,j,k)=rhos(i,j,k)+rhodirt(i,j,k)
               cpsolid(i,j,k)=(rhof(i,j,k)*cpwood
      &             +cpwater*rmoist(i,j,k)*rhof(i,j,k))/rhos(i,j,k)
+              if (idirt.eq.1) cpsolid(i,j,k)=cpsolid(i,j,k)+
+     +              rhodirt(i,j,k)*cpdirt/rhos(i,j,k)
             enddo
           enddo
         enddo
@@ -267,6 +274,8 @@ c     BELOW THIS LINE IGNITION PATTERN: all irst
                    rhos(i,j,k)=rhof(i,j,k)+rhowater(i,j,k)
                    cpsolid(i,j,k)=(rhof(i,j,k)*cpwood
      &                   +cpwater*rmoist(i,j,k)*rhof(i,j,k))   /rhos(i,j,k)
+              if (idirt.eq.1) cpsolid(i,j,k)=cpsolid(i,j,k)+
+     +              rhodirt(i,j,k)*cpdirt/rhos(i,j,k)
        else if (iheatsource.ge.1) then !only if ifp=1 or ijld=1
         ! definition of heatsource extension
                  xhsmintmp=min(xhsmintmp,(ia-1)*dx+hsros*max(0,ittot-1)*dt)

@@ -48,7 +48,7 @@ firerad: ${OBJS}
 	${FC} -o $@  ${FFLAGS} ${OBJS} ${MPILIB}
 
 clean: 
-	rm *.o *.mod firerad
+	rm *.o *.mod *__genmod.f90
 
 # optimized suffix rules
 .SUFFIXES: .f .f90 
