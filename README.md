@@ -21,61 +21,63 @@ FIRETEC OSS LICENSE is O5086
 This branch hosts the latest Check-point version of FIRETEC-1.5.0. Use the 'develop' branch for latest features and current developments.
 
 In this repository, we have three directories:
+
     1) CODE-xxxx - contains the source code for the software, see the README.md in that directory to see how to configure and build the executable of the software.
+
     2) TOOLS - contains a number of developed example input files and post-analysis script used to help set up and interpret FIRETEC simulations.
+
     3) DOCS - the future destination of documentation as it's developed and posted.
 
-FIRETEC-1.5.0 builds on FIRETEC-1.4.1 but consists of several major code restructurings, new capabilities, and extensive general code clean-up.
+#-------------------------------------------------------------------------
 
-***Code Restructuring***
+FIRETEC-1.5.1 builds on FIRETEC-1.5.0 with continued code modulization and restructuring to improve maintainability and extensibility.
 
-**HIGRAD/FIRETEC Integration**
+***Major Changes from FIRETEC-1.5.0***
 
-Rather than running HIGRAD and FIRETEC as two separate codes that have partially but not fully merged together, we’ve restructured the code as a numerical solver that then can call up functionalities (not distinguishing between HIGRAD & FIRETEC at this point) to accomplish certain tasks. This numerical solver: 1) Gathers user input, 2) Sets up computer architecture, and 3) Initializes each simulation (including if a restart occurs) prior to the iterating timesteps of the simulation. After entering the iterating timesteps the solver will: 1) Update domains with any global dependencies (pressure, tempg, etc.), 2) Calculate explicit forcing functions, both for large timesteps (to be used once per timestep), and for small timesteps (to be used at each step of the implicit solver, 3) Apply an implicit solver, MOA is exclusively implemented and used for now but there is infrastructure for Runga-Kutta to be implemented in the future, 4) Domain updates and forcing calculations done as needed within the implicit solver, and 5) IO.
+**Further Modulization**
 
-**Modulization**
+Continued separation of capabilities into independent modules:
+- **Radiation Module**: Radiation physics (previously a single 1000+ line file) has been restructured into a dedicated module with separate components for Monte Carlo radiation transport, solar heating, radiative sinks, initialization, and input handling.
+- **Vegetation Module**: All vegetation-related physics (fuel dynamics, combustion, drag, convection, diffusion, evaporation, and ignition) consolidated into a single module, replacing the previously scattered implementation across multiple root-level files.
 
-Individual capabilities of the code are being isolated and implemented as independent modules that can be called up specifically to accomplish tasks (e.g. compute forcings), almost like libraries. The overall code uses the modules but isn’t necessarily dependent on any given one to run (compiler predirectives still to be implemented but it’s set-up to do this). This allows for easy transferability of these capabilities to other applications and codes, and also allows for the modules to be placed at various levels of export-control if needed as we pursue an open-source license.
+**Enhanced Build System**
 
-**CMake**
+- Improved CMake configuration with better compiler detection and platform-specific optimizations
+- Added Apple Silicon optimization support (M1/M2 processors)
+- Separated debug and optimization flags with cleaner option handling
+- Optional double precision build flag (DBL_PREC) with improved implementation
+- Support for optional LANL auxiliary modules via separate repository integration
 
-We’ve replaced the building makefiles with cmake which allows for better integration of the modulization while also easing buildability across various platforms.
+**Code Architecture**
 
-**Thermodynamics**
+- Eliminated monolithic files (con.F90, convection.F90, diffusesies.F90, drag.F90, fuel.F90, fuel_functions.F90, filstr.F90, ignite.F90, rinitfire.F90, radiation.F90) in favor of modular structure
+- Vegetation and Radiation modules now follow consistent naming conventions (_veg, _rad suffixes)
+- Better separation of concerns with dedicated subdirectories for each major capability
 
-Thermodynamic variables (pressure, heat capacity, etc) are now consolidated and updated regularly rather than ad hoc when needed. These variables also now account for changing chemistry as fluid composition changes.
+**Variables Module Enhancement**
+
+- Expanded variables.F90 to better manage global state and dependencies across modules (~19KB vs ~15KB in 1.5.0)
+
+This version maintains backward compatibility in terms of physics implementation while providing a more maintainable and extensible codebase for future development.
 
 ***New Capabilities***
 
-**Emissions**
+**Mirrored Boundary Capabilities**
 
-New module that allows a user to generate various emissions (gas or aerosols) with three distinct methodologies: 1) fixed-source emissions such as from a power-plant, gas-leak, etc, 2) fixed-emission factor emissions where a user-specifies specific fire emission factors, or 3) physics-based emission factors using Z-BEST model as before, currently limited in species.
+In addition to the relaxed and cyclic boundary conditions, a mirriored boundary condition was added which will mirror internal domain conditions in domain boundary ghost cells and reflect vector conditions orthaganol to the boundary itself.
 
-**Artificial Heat Source**
+**Ambient Heating**
 
-User may specify a wide range of artificial heat sources throughout the domain.
+Solar heating of fuels with solar angles and heat fluxes calculated. Additional bulk moisture evaporation rates calculated due to this heating.
 
-**Sensors**
+**Aerosol Physics**
 
-User may specify the code to output specifics variables and specific locations and time frequencies.
-
-**xeVariation**
-
-User may now bring in dynamic environmental conditions in either sparse or dense data formats.
-
-**Double Precision**
-
-Changed in the CMakeLists, one can now switch everything to double precision if needed
+Additional forcing terms introduced for particule coagulation, settling, and deposition affecting aerosols. Explicit aerosol tracking with the method of moments for mass distributions introduced.
 
 ***Bug Fixes***
 
-Reworked fuel bed velocities with multiple fuels, previous working was inconsistent with quality checks.
+Many, see the git logs
 
 ***Code Clean-up***
 
 Whole code re-worked in general clean-up and to be compatible with non-specific compilers. Detail is too extensive to list (every file) but the end result uses the same physics in the same operations but with different architecture and orders.
-
-All files now within a 72 character-column limit in case compiler limited.
-
-Firebrands reworked back into the code.
-
