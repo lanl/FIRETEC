@@ -18,7 +18,7 @@ FIRETEC OSS LICENSE is O5086
 
 #-------------------------------------------------------------------------
 
-This branch hosts the latest Check-point version of FIRETEC-1.5.0. Use the 'develop' branch for latest features and current developments.
+This branch hosts the latest Check-point version of FIRETEC-1.5.1. Use the 'develop' branch for latest features and current developments.
 
 In this repository, we have three directories:
 
