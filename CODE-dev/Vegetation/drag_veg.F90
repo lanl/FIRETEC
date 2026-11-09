@@ -94,7 +94,7 @@ end subroutine dragm
 subroutine fuelDragCorrection(i,j,nfuel,afd,rhoFuel,rhoWater,u,v,w, &
   u_corr,v_corr,w_corr,iflag) 
   use gridlist_variables, only : wp 
-  use metric_variables, only : zs,zedge 
+  use metric_variables, only : zedge 
   use fuel_variables, only : kfindex,kfrank
   Implicit None
 

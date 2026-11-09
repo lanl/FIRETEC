@@ -3,6 +3,7 @@
 !     the nv variables. It can use either donorcell or fct
 !**********************************************************************!
 module advection_functions
+
   use gridlist_variables, only : wp
 
   contains
@@ -113,7 +114,7 @@ subroutine setAdvectiveVelocities(u,v,o,il,iu,jl,ju,lls,dta)
   gcz=dta*dzi
 
   ! compute contravariant cell face in the x direction
-  call update(u,np,mp,l,1-ih,np+ih,1-ih,mp+ih,2,0,1)
+  call update(u,np,mp,l,1-ih,np+ih,1-ih,mp+ih,2,1)
   do k=1,l
     do j=1,mp
       do i=1,np+1
@@ -122,7 +123,7 @@ subroutine setAdvectiveVelocities(u,v,o,il,iu,jl,ju,lls,dta)
     enddo
   enddo
 
-  call update(v,np,mp,l,1-ih,np+ih,1-ih,mp+ih,3,0,2)
+  call update(v,np,mp,l,1-ih,np+ih,1-ih,mp+ih,3,2)
   do k=1,l
     do j=1,mp+1
       do i=1,np
@@ -321,29 +322,27 @@ subroutine mpdata(x,xrho,h,il,iu,jl,ju,lls,nvp)
           enddo
         enddo
       enddo
-      f3(1:np,1:mp,  1,kv)=0._wp
+      f3(1:np,1:mp,1,kv)=0._wp
       if(ibctopopen.eq.0)then
         f3(1:np,1:mp,l+1,kv)=0._wp
       else
         do j=1,mp
           do i=1,np
             f3(i,j,l+1,kv)=donor(c1*x(i,j,l,kv)+c2, &
-              c1*x(i,j,l,kv)+c2,max(0.0_wp,v3mp(i,j,l+1,kv)))
+              c1*x(i,j,l,kv)+c2,max(0._wp,v3mp(i,j,l+1,kv)))
           enddo
         enddo
       endif
 
       if (rightedge.eq.0) then                       
-        call update(f1(:,:,:,kv),np,mp,l,1-ih,np+ih+1,1-ih,mp+ih,2,1,1) 
+        call update(f1(:,:,:,kv),np,mp,l,1-ih,np+ih+1,1-ih,mp+ih,2,1) 
       else
-        call update(f1(:,:,:,kv),np+1,mp,l, &
-                    1-ih,np+ih+1,1-ih,mp+ih,2,0,1) 
+        call update(f1(:,:,:,kv),np+1,mp,l,1-ih,np+ih+1,1-ih,mp+ih,2,1) 
       endif
       if(topedge.eq.0) then                       
-        call update(f2(:,:,:,kv),np,mp,l,1-ih,np+ih,1-ih,mp+ih+1,3,2,2) 
+        call update(f2(:,:,:,kv),np,mp,l,1-ih,np+ih,1-ih,mp+ih+1,3,2) 
       else
-        call update(f2(:,:,:,kv),np,mp+1,l, &
-                    1-ih,np+ih,1-ih,mp+ih+1,3,0,2) 
+        call update(f2(:,:,:,kv),np,mp+1,l,1-ih,np+ih,1-ih,mp+ih+1,3,2) 
       endif
 
       do k=1,l
@@ -357,7 +356,7 @@ subroutine mpdata(x,xrho,h,il,iu,jl,ju,lls,nvp)
         enddo
       enddo
       call loop_update_flags(kv,iuv)
-      call update(x(:,:,:,kv),np,mp,l,1-ih,np+ih,1-ih,mp+ih,1,0,iuv) 
+      call update(x(:,:,:,kv),np,mp,l,1-ih,np+ih,1-ih,mp+ih,1,iuv) 
     enddo ! kv=1:nv
 
     if(itr.ne.iord)then  !! Skip if iord.eq.1: start of mpdata when iord=2: escaping to LINE 1403
@@ -372,21 +371,18 @@ subroutine mpdata(x,xrho,h,il,iu,jl,ju,lls,nvp)
         v3mp(:,:,:,kv)=0._wp
         
         if (rightedge.eq.0) then                       
-          call update(f1(:,:,:,kv),np,mp,l, &
-           1-ih,np+ih+1,1-ih,mp+ih,1,1,1) 
+          call update(f1(:,:,:,kv),np,mp,l,1-ih,np+ih+1,1-ih,mp+ih,1,1) 
         else
           call update(f1(:,:,:,kv),np+1,mp,l, &
-           1-ih,np+ih+1,1-ih,mp+ih,1,0,1) 
+           1-ih,np+ih+1,1-ih,mp+ih,1,1) 
         endif
         if (topedge.eq.0) then 
-          call update(f2(:,:,:,kv),np,mp,l, &
-                      1-ih,np+ih,1-ih,mp+ih+1,1,2,2) 
+          call update(f2(:,:,:,kv),np,mp,l,1-ih,np+ih,1-ih,mp+ih+1,1,2) 
         else
           call update(f2(:,:,:,kv),np,mp+1,l, &
-                      1-ih,np+ih,1-ih,mp+ih+1,1,0,2)  
+                      1-ih,np+ih,1-ih,mp+ih+1,1,2)  
         endif
-        call update(f3(:,:,:,kv),np,mp,l+1, &
-                      1-ih,np+ih,1-ih,mp+ih,1,0,0) 
+        call update(f3(:,:,:,kv),np,mp,l+1,1-ih,np+ih,1-ih,mp+ih,1,0) 
 
         !!! compute antidiffusive velocities in x direction
         illim = 1 + leftedge                       
@@ -471,7 +467,7 @@ subroutine mpdata(x,xrho,h,il,iu,jl,ju,lls,nvp)
                  0.5_wp*(h(i,j-1,k)+h(i,j,k)))      &
                  -vdiv2(f2(i,j,k,kv),f3(i,j-1,k+1,kv), &
                  f3(i,j,k+1,kv),f3(i,j-1,k,kv), &
-                 f3(i,j,k,kv),    0.5_wp*(h(i,j-1,k)+h(i,j,k)))
+                 f3(i,j,k,kv),0.5_wp*(h(i,j-1,k)+h(i,j,k)))
                v2mp(i,j,k,kv)=v2mp(i,j,k,kv)+(pp(v2d)*x(i,j-1,k,kv)- &
                  pn(v2d)*x(i,j,k,kv))
               enddo
@@ -518,11 +514,11 @@ subroutine mpdata(x,xrho,h,il,iu,jl,ju,lls,nvp)
                  -vdiv2(f3(i,j,k,kv), &
                  f1(i+1,j,k-1,kv),f1(i+1,j,k,kv), &
                  f1(i,j,k-1,kv), &
-                 f1(i,j,k,kv),  0.5_wp*(h(i,j,k-1)+h(i,j,k))) &
+                 f1(i,j,k,kv),0.5_wp*(h(i,j,k-1)+h(i,j,k))) &
                  -vdiv2(f3(i,j,k,kv), &
                  f2(i,j+1,k-1,kv),f2(i,j+1,k,kv), &
                  f2(i,j,k-1,kv), &
-                 f2(i,j,k,kv),    0.5_wp*(h(i,j,k-1)+h(i,j,k)))
+                 f2(i,j,k,kv),0.5_wp*(h(i,j,k-1)+h(i,j,k)))
                 v3mp(i,j,k,kv)=v3mp(i,j,k,kv) &
                  +(pp(v3d)*x(i,j,k-1,kv)-pn(v3d)*x(i,j,k,kv))
               enddo
@@ -588,18 +584,18 @@ subroutine mpdata(x,xrho,h,il,iu,jl,ju,lls,nvp)
 
           if (rightedge.eq.0) then                       
             call update(f1(:,:,:,kv), &
-              np,mp,l,1-ih,np+ih+1,1-ih,mp+ih,2,1,1) 
+              np,mp,l,1-ih,np+ih+1,1-ih,mp+ih,2,1) 
           else
             call update(f1(:,:,:,kv), &
-              np+1,mp,l,1-ih,np+ih+1,1-ih,mp+ih,2,0,1) 
+              np+1,mp,l,1-ih,np+ih+1,1-ih,mp+ih,2,1) 
           endif
 
           if (topedge.eq.0) then                       
             call update(f2(:,:,:,kv), &
-              np,mp,l,1-ih,np+ih,1-ih,mp+ih+1,3,2,2) 
+              np,mp,l,1-ih,np+ih,1-ih,mp+ih+1,3,2) 
           else
             call update(f2(:,:,:,kv), &
-              np,mp+1,l,1-ih,np+ih,1-ih,mp+ih+1,3,0,2) 
+              np,mp+1,l,1-ih,np+ih,1-ih,mp+ih+1,3,2) 
           endif
 
           do k=1,l
@@ -620,9 +616,9 @@ subroutine mpdata(x,xrho,h,il,iu,jl,ju,lls,nvp)
 
           call loop_update_flags(kv,iuv)
           call update(cpmp(:,:,:,kv), &
-            np,mp,l,1-ih,np+ih,1-ih,mp+ih,0,0,iuv) 
+            np,mp,l,1-ih,np+ih,1-ih,mp+ih,0,iuv) 
           call update(cnmp(:,:,:,kv), &
-            np,mp,l,1-ih,np+ih,1-ih,mp+ih,0,0,iuv) 
+            np,mp,l,1-ih,np+ih,1-ih,mp+ih,0,iuv) 
 
           illim = 1+leftedge                       
           do k=1,l
@@ -699,17 +695,17 @@ subroutine mpdata(x,xrho,h,il,iu,jl,ju,lls,nvp)
 
               if (rightedge.eq.0) then                       
                 call update(f1(:,:,:,kv), &
-                  np,mp,l,1-ih,np+ih+1,1-ih,mp+ih,2,1,1) 
+                  np,mp,l,1-ih,np+ih+1,1-ih,mp+ih,2,1) 
               else
                 call update(f1(:,:,:,kv), &
-                  np+1,mp,l,1-ih,np+ih+1,1-ih,mp+ih,2,0,1) 
+                  np+1,mp,l,1-ih,np+ih+1,1-ih,mp+ih,2,1) 
               endif
               if (topedge.eq.0) then                       
                 call update(f2(:,:,:,kv), &
-                  np,mp,l,1-ih,np+ih,1-ih,mp+ih+1,3,2,2) 
+                  np,mp,l,1-ih,np+ih,1-ih,mp+ih+1,3,2) 
               else
                 call update(f2(:,:,:,kv), &
-                  np,mp+1,l,1-ih,np+ih,1-ih,mp+ih+1,3,0,2) 
+                  np,mp+1,l,1-ih,np+ih,1-ih,mp+ih+1,3,2) 
               endif
             enddo !kv=1:nv
           endif ! itrfct.eq.1
@@ -749,9 +745,9 @@ subroutine mpdata(x,xrho,h,il,iu,jl,ju,lls,nvp)
 
             call loop_update_flags(kv,iuv)
             call update(cpmp(:,:,:,kv), &
-              np,mp,l,1-ih,np+ih,1-ih,mp+ih,0,0,iuv) 
+              np,mp,l,1-ih,np+ih,1-ih,mp+ih,0,iuv) 
             call update(cnmp(:,:,:,kv), &
-              np,mp,l,1-ih,np+ih,1-ih,mp+ih,0,0,iuv) 
+              np,mp,l,1-ih,np+ih,1-ih,mp+ih,0,iuv) 
           enddo ! kv=1:nv-1
 
         !!! correction coeffiecients for rho
@@ -778,10 +774,8 @@ subroutine mpdata(x,xrho,h,il,iu,jl,ju,lls,nvp)
             enddo !k=1:l
           enddo !kv=1:nv-1 
 
-          call update(cpmp(:,:,:,nvp), &
-            np,mp,l,1-ih,np+ih,1-ih,mp+ih,0,0,0) 
-          call update(cnmp(:,:,:,nvp), &
-            np,mp,l,1-ih,np+ih,1-ih,mp+ih,0,0,0) 
+          call update(cpmp(:,:,:,nvp),np,mp,l,1-ih,np+ih,1-ih,mp+ih,0,0) 
+          call update(cnmp(:,:,:,nvp),np,mp,l,1-ih,np+ih,1-ih,mp+ih,0,0) 
 
           do kv=1,nvp
             do k=1,l
@@ -848,18 +842,18 @@ subroutine mpdata(x,xrho,h,il,iu,jl,ju,lls,nvp)
 
               if(rightedge.eq.0) then                       
                 call update(f1o(:,:,:,kv), &
-                  np,mp,l,1-ih,np+ih+1,1-ih,mp+ih,2,1,1) 
+                  np,mp,l,1-ih,np+ih+1,1-ih,mp+ih,2,1) 
               else
                 call update(f1o(:,:,:,kv), &
-                  np+1,mp,l,1-ih,np+ih+1,1-ih,mp+ih,2,0,1) 
+                  np+1,mp,l,1-ih,np+ih+1,1-ih,mp+ih,2,1) 
               endif
  
               if(topedge.eq.0) then                       
                 call update(f2o(:,:,:,kv), &
-                  np,mp,l,1-ih,np+ih,1-ih,mp+ih+1,3,2,2) 
+                  np,mp,l,1-ih,np+ih,1-ih,mp+ih+1,3,2) 
               else
                 call update(f2o(:,:,:,kv), &
-                  np,mp+1,l,1-ih,np+ih,1-ih,mp+ih+1,3,0,2) 
+                  np,mp+1,l,1-ih,np+ih,1-ih,mp+ih+1,3,2) 
               endif
 
               do k=1,l
@@ -875,7 +869,7 @@ subroutine mpdata(x,xrho,h,il,iu,jl,ju,lls,nvp)
               enddo !k 
               call loop_update_flags(kv,iuv)
               call update(x(:,:,:,kv),np,mp,l, &
-                1-ih,np+ih,1-ih,mp+ih,1,0,iuv) 
+                1-ih,np+ih,1-ih,mp+ih,1,iuv) 
             enddo !kv=1:nv
           endif ! itrfct < nfct
         enddo ! itrfct=1:nfct

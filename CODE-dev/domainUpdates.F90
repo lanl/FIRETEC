@@ -59,7 +59,7 @@ subroutine implicit_domain_updates
       enddo
     enddo
   enddo
-  call update(tempg,np,mp,l,1-ih,np+ih,1-ih,mp+ih,0,0,0)
+  call update(tempg,np,mp,l,1-ih,np+ih,1-ih,mp+ih,0,0)
   
   if(isies.ne.1)then
     do k=1,lfuel
@@ -101,7 +101,7 @@ subroutine explicit_domain_updates
   Implicit None
 
   ! Local Variables
-  integer :: i,j,k,iuv,ift,kv
+  integer :: i,j,k,ift,kv,iuv
   real(wp):: g13, g23, g33 ! metric tensor 
   real(wp):: uground,vground,wground ! cartesian at ground level     
   real(wp):: yEmit_local(nEmit)
@@ -125,10 +125,10 @@ subroutine explicit_domain_updates
       enddo
     enddo
   enddo
-  call update(tempg,np,mp,l,1-ih,np+ih,1-ih,mp+ih,0,0,0)
+  call update(tempg,np,mp,l,1-ih,np+ih,1-ih,mp+ih,0,0)
   k=1 !bottombc
-  do j=1-ih,mp+ih
-    do i=1-ih,np+ih
+  do j=1,mp
+    do i=1,np
       g13 = c13(i,j)*gmul(1)
       g23 = c23(i,j)*gmul(1)
       g33 = g13**2+g23**2+gi(i,j,1)**2
@@ -142,6 +142,10 @@ subroutine explicit_domain_updates
       wground = - (g13 * uground + g23 * vground)/gi(i,j,1)
       xvrho(i,j,0,iwvel) = 2*wground-xvrho(i,j,1,iwvel)
     enddo
+  enddo
+  do kv=1,nv-1
+    call loop_update_flags(kv,iuv)
+    call update(xvrho(:,:,0,kv),np,mp,1,1-ih,np+ih,1-ih,mp+ih,1,0)
   enddo
 
   if(isies.ne.1)then

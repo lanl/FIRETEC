@@ -97,7 +97,7 @@ subroutine gradmoa()
       enddo
     enddo
   enddo
-  call update(pr,np,mp,l,1-ih,np+ih,1-ih,mp+ih,0,0,0)
+  call update(pr,np,mp,l,1-ih,np+ih,1-ih,mp+ih,0,0)
 
   do k=1,l
     do j=1,mp                  

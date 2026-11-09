@@ -10,26 +10,6 @@
 !  It also included boundary conditions when relaxation to xe is used
 !  otherwhise, bc are hard coded (pr, u1,u2,u3, turbulence...)
 !
-!  NB1: FP introduced a fix here for arrays of period np defined on
-!  np+1 arrays (for ex advective velocities). the flag iperiod is
-!  defined:
-!     if iperiod = 0 i0=j0=0
-!     if iperiod = 1 i0=1 and j0=0
-!     if iperiod = 2 i0=0 and j0=1
-!  The use of i0 (or j0 with nyp) is the following:
-!  For arrays defined on cell face dim [1-ih, np+1+ih], 
-!  il=1-ih,iu=np+1+ih, nxp=np+1 and i0=1
-!  the block of data [1+i0,ih+i0] and [np+1+ih-1-i0, np+1-i0] is send
-!  receive for i=[1-ih,0] and i=[np+1+1,np+1+ih] which is correct
-!  because a(np+1) of current proc is equal to a(1) of peright and
-!  a(1) of current proc to a(np+1) of peleft. (period is np and not
-!  np+1)
-!
-!  NB2: when we are at a boundary of the domain and NOT with cyclic bc
-!  (topedge, ...), an additionnal treatment is done using the env
-!  field : the ghost cells are forced with xe values in
-!  [1,nxp][1,nyp][1,nzp]
-!  
 !  "iuv" inputs in the subroutine dictate 
 !  Dirichlet(1) or Neumann(0) for the top and sides if the boundary 
 !  conditions are symmetric (ibc_* = 5).  For symmetric or mirror 
@@ -37,7 +17,7 @@
 !  normal to the particular boundary.
 !
 !-----------------------------------------------------------------------
-subroutine update(a,nxp,nyp,nzp,il,iu,jl,ju,icorner,iperiod,iuv)
+subroutine update(a,nxp,nyp,nzp,il,iu,jl,ju,icorner,iuv)
   use gridlist_variables, only : ih,wp, &
     ibc_top,ibc_bot,ibc_left,ibc_right
   use msga_variables, only : ierror,mpi_status_size,pebelow,peabove, &
@@ -47,11 +27,11 @@ subroutine update(a,nxp,nyp,nzp,il,iu,jl,ju,icorner,iperiod,iuv)
   Implicit None
 
   ! Local Variables
-  integer,intent(in) :: nxp,nyp,nzp,il,iu,jl,ju,icorner,iperiod,iuv
+  integer,intent(in) :: nxp,nyp,nzp,il,iu,jl,ju,icorner,iuv
   real(wp),intent(inout) :: a(il:iu,jl:ju,nzp)
 
   integer :: i,j,k
-  integer :: i0,j0,imirror,jmirror
+  integer :: imirror,jmirror
   integer :: itag,ncount
   real(wp) :: tmpxsnd(nxp*ih*nzp),tmpxrcv(nxp*ih*nzp), &
     tmpysnd(nyp*ih*nzp),tmpyrcv(nyp*ih*nzp), &
@@ -59,10 +39,6 @@ subroutine update(a,nxp,nyp,nzp,il,iu,jl,ju,icorner,iperiod,iuv)
   integer,allocatable :: sndrcvStatus(:)
 
   ! Executable Code
-  i0=0
-  j0=0
-  if(iperiod.eq.1) i0=1
-  if(iperiod.eq.2) j0=1
   imirror=1
   jmirror=1
   if(iuv.eq.1) imirror=-1
@@ -77,7 +53,7 @@ subroutine update(a,nxp,nyp,nzp,il,iu,jl,ju,icorner,iperiod,iuv)
       do j=1,ih
         do i=1,nxp
           ncount=ncount+1
-          tmpxsnd(ncount)=a(i,j+j0,k)
+          tmpxsnd(ncount)=a(i,j,k)
         enddo
       enddo
     enddo
@@ -121,7 +97,7 @@ subroutine update(a,nxp,nyp,nzp,il,iu,jl,ju,icorner,iperiod,iuv)
       do j=1,ih
         do i=1,nxp
           ncount=ncount+1
-          tmpxsnd(ncount)=a(i,nyp-j0-ih+j,k)
+          tmpxsnd(ncount)=a(i,nyp-ih+j,k)
         enddo
       enddo
     enddo
@@ -167,7 +143,7 @@ subroutine update(a,nxp,nyp,nzp,il,iu,jl,ju,icorner,iperiod,iuv)
       do j=1,nyp
         do i=1,ih
           ncount=ncount+1
-          tmpysnd(ncount)=a(i+i0,j,k)
+          tmpysnd(ncount)=a(i,j,k)
         enddo
       enddo
     enddo
@@ -211,7 +187,7 @@ subroutine update(a,nxp,nyp,nzp,il,iu,jl,ju,icorner,iperiod,iuv)
       do j=1,nyp
         do i=1,ih
           ncount=ncount+1
-          tmpysnd(ncount)=a(nxp-i0-ih+i,j,k)
+          tmpysnd(ncount)=a(nxp-ih+i,j,k)
         enddo
       enddo
     enddo
@@ -258,7 +234,7 @@ subroutine update(a,nxp,nyp,nzp,il,iu,jl,ju,icorner,iperiod,iuv)
       do j=1,ih
         do i=1,ih
           ncount=ncount+1
-          tmpcorsnd(ncount)=a(nxp-i0-ih+i,nyp-j0-ih+j,k)
+          tmpcorsnd(ncount)=a(nxp-ih+i,nyp-ih+j,k)
         enddo
       enddo
     enddo
@@ -347,7 +323,7 @@ subroutine update(a,nxp,nyp,nzp,il,iu,jl,ju,icorner,iperiod,iuv)
       do j=1,ih
         do i=1,ih
           ncount=ncount+1
-          tmpcorsnd(ncount)=a(nxp-i0-ih+i,j+j0,k)
+          tmpcorsnd(ncount)=a(nxp-ih+i,j,k)
         enddo
       enddo
     enddo
@@ -436,7 +412,7 @@ subroutine update(a,nxp,nyp,nzp,il,iu,jl,ju,icorner,iperiod,iuv)
       do j=1,ih
         do i=1,ih
           ncount=ncount+1
-          tmpcorsnd(ncount)=a(i+i0,j+j0,k)
+          tmpcorsnd(ncount)=a(i,j,k)
         enddo
       enddo
     enddo
@@ -525,7 +501,7 @@ subroutine update(a,nxp,nyp,nzp,il,iu,jl,ju,icorner,iperiod,iuv)
       do j=1,ih
         do i=1,ih
           ncount=ncount+1
-          tmpcorsnd(ncount)=a(i+i0,nyp-ih-j0+j,k)
+          tmpcorsnd(ncount)=a(i,nyp-ih+j,k)
         enddo
       enddo
     enddo

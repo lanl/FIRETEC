@@ -79,7 +79,7 @@ subroutine MOA
     do kv=1,nv
       call donorcell(xvtmp(:,:,:,kv),1-ih,np+ih,1-ih,mp+ih,l)
       call loop_update_flags(kv,iuv)
-      call update(xvtmp(:,:,:,kv),np,mp,l,1-ih,np+ih,1-ih,mp+ih,0,0,iuv)
+      call update(xvtmp(:,:,:,kv),np,mp,l,1-ih,np+ih,1-ih,mp+ih,0,iuv)
     enddo 
 
     call implicit_domain_updates
@@ -96,7 +96,7 @@ subroutine MOA
         enddo
       enddo
       call loop_update_flags(kv,iuv)
-      call update(xvtmp(:,:,:,kv),np,mp,l,1-ih,np+ih,1-ih,mp+ih,1,0,iuv) 
+      call update(xvtmp(:,:,:,kv),np,mp,l,1-ih,np+ih,1-ih,mp+ih,1,iuv) 
     enddo
     call forcingLimits(xvtmp,xvLim,1-ih,np+ih,1-ih,mp+ih,l,nv)
     xvfueltmp=xvfueltmp+forceSE_xvfuel*dts

@@ -32,9 +32,9 @@ subroutine metric()
     enddo
   enddo
 
-  call update(gi,np,mp,l,1-ih,np+ih,1-ih,mp+ih,1,0,0)
-  call update(h,np,mp,l,1-ih,np+ih,1-ih,mp+ih,1,0,0)
-  call update(go,np,mp,1,1-ih,np+ih,1-ih,mp+ih,1,0,0)
+  call update(gi,np,mp,l,1-ih,np+ih,1-ih,mp+ih,1,0)
+  call update(h,np,mp,l,1-ih,np+ih,1-ih,mp+ih,1,0)
+  call update(go,np,mp,1,1-ih,np+ih,1-ih,mp+ih,1,0)
   
   do j=1,mp
     do i=1+leftedge,np-rightedge
@@ -68,8 +68,8 @@ subroutine metric()
     enddo
   endif
 
-  call update(c13,np,mp,1,1-ih,np+ih,1-ih,mp+ih,1,0,0)
-  call update(c23,np,mp,1,1-ih,np+ih,1-ih,mp+ih,1,0,0)
+  call update(c13,np,mp,1,1-ih,np+ih,1-ih,mp+ih,1,0)
+  call update(c23,np,mp,1,1-ih,np+ih,1-ih,mp+ih,1,0)
   deallocate (go)
 end subroutine metric
 
