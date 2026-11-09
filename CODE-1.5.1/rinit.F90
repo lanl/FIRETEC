@@ -78,7 +78,7 @@ subroutine rinit
   
   do kv=1,nv
     call loop_update_flags(kv,iuv)
-    call update(xv(:,:,:,kv),np,mp,l,1-ih,np+ih,1-ih,mp+ih,1,0,iuv)
+    call update(xv(:,:,:,kv),np,mp,l,1-ih,np+ih,1-ih,mp+ih,1,iuv)
   enddo
 
   if(islip.eq.1)then

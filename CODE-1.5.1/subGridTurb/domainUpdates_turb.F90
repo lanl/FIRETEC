@@ -60,12 +60,12 @@ subroutine turbFieldUpdate()
   enddo         
 
   ! update including corners
-  call update(rtke_abc(:,:,1:l),np,mp,l,1-ih,np+ih,1-ih,mp+ih,1,0,0)
+  call update(rtke_abc(:,:,1:l),np,mp,l,1-ih,np+ih,1-ih,mp+ih,1,0)
 
   ! update without corners
-  call update(sqrtG_Kxy,np,mp,l,1-ih,np+ih,1-ih,mp+ih,0,0,0)
-  call update(sqrtG_Kz,np,mp,l,1-ih,np+ih,1-ih,mp+ih,0,0,0)
-  call update(sqrtG_KG33,np,mp,l,1-ih,np+ih,1-ih,mp+ih,0,0,0)
+  call update(sqrtG_Kxy,np,mp,l,1-ih,np+ih,1-ih,mp+ih,0,0)
+  call update(sqrtG_Kz,np,mp,l,1-ih,np+ih,1-ih,mp+ih,0,0)
+  call update(sqrtG_KG33,np,mp,l,1-ih,np+ih,1-ih,mp+ih,0,0)
   
   k=1 !bottombc
   do j=1-ih+1,mp+ih-1

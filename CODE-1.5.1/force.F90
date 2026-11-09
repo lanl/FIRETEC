@@ -24,7 +24,7 @@ subroutine forcing
     !!!!! Transported Forcings !!!!!!
     call loop_update_flags(kv,iuv)
     call update(forceLE_xv(:,:,:,kv),np,mp,l, &
-      1-ih,np+ih,1-ih,mp+ih,0,0,iuv)
+      1-ih,np+ih,1-ih,mp+ih,0,iuv)
     call donorcell(forceLE_xv(:,:,:,kv),1-ih,np+ih,1-ih,mp+ih,l)
     do k=1,l
       do j=1,mp
@@ -35,7 +35,7 @@ subroutine forcing
     enddo
     call forcingLimits(xv(:,:,:,kv),xvLim(:,kv), &
       1-ih,np+ih,1-ih,mp+ih,l,1)
-    call update(xv(:,:,:,kv),np,mp,l,1-ih,np+ih,1-ih,mp+ih,1,0,iuv) 
+    call update(xv(:,:,:,kv),np,mp,l,1-ih,np+ih,1-ih,mp+ih,1,iuv) 
   enddo
 
   !!!!! Fuel Forcings !!!!!

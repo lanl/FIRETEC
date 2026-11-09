@@ -25,7 +25,7 @@ subroutine topo
   deallocate(zsio)
 
   ! Initialize topo values for ghost points
-  call update(zs,np,mp,1,1-ih,np+ih,1-ih,mp+ih,1,0,0)
+  call update(zs,np,mp,1,1-ih,np+ih,1-ih,mp+ih,1,0)
   
   ! Set edges of the domain
   if(leftedge.eq.1) then

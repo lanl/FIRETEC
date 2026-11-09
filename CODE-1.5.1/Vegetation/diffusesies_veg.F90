@@ -31,7 +31,7 @@ subroutine diffusesies(xvrhoFuel,xvrhoWater,frhof,fsies, &
    
   do ift=1,nfuel
     call update(temps(ift,:,:,:),iu,ju,lls, &
-      il-ih,iu+ih,jl-ih,ju+ih,1,0,0)
+      il-ih,iu+ih,jl-ih,ju+ih,0,0)
 
     ! compute contravariant component x-flux at (i-1/2,j,k) hxc (sqrt(g) burried in...
     ! top bc of phi is hardcoded kp1=l when k=l

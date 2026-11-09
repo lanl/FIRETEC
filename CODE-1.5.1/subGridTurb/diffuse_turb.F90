@@ -57,7 +57,7 @@ subroutine diffuse(fphi,phi,il,iu,jl,ju,lls,cdiff)
   hdyi=0.5_wp*dyi
   hdzi=0.5_wp*dzi
   allocate(hxc(np+1,mp,lls),hyc(np,mp+1,lls))
-  allocate(hzc(np,mp,lls+1)); hzc=0.0_wp
+  allocate(hzc(np,mp,lls+1)); hzc=0._wp
 
   ! compute contravariant component x-flux at (i-1/2,j,k) hxc (sqrt(g) burried  in...) top bc of phi is hardcoded kp1=l when k=l
   do k=1,lls
@@ -107,7 +107,7 @@ subroutine diffuse(fphi,phi,il,iu,jl,ju,lls,cdiff)
   enddo
       
   ! compute contravariant component z-flux at i,j,k-1/2 hzc (sqrtg buried in) top boundary condition on phi, rvtxy, rvtya is burried here (k=l when k=l+1)
-  do k=1,lls+1
+  do k=1,lls
     km1=max(1,k-1)
     do j=1,mp
       do i=1,np

@@ -93,10 +93,9 @@ subroutine papv_defs
 
   ! Executable Code
   do ift=1,nfuel
-    call update(temps(ift,:,:,:),np,mp,lfuel, &
-      1-ih,np+ih,1-ih,mp+ih,1,0,0)
+    call update(temps(ift,:,:,:),np,mp,lfuel,1-ih,np+ih,1-ih,mp+ih,0,0)
   enddo
-  call update(tempg,np,mp,l,1-ih,np+ih,1-ih,mp+ih,1,0,0)
+  call update(tempg,np,mp,l,1-ih,np+ih,1-ih,mp+ih,0,0)
   papvift  = 0._wp
   papvgas  = 0._wp
   papvtotAZ= 0._wp
